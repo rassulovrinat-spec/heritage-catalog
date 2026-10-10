@@ -42,7 +42,7 @@ img { display: block; max-width: 100%; }
 .bar nav a:hover { text-decoration: underline; text-underline-offset: 4px; }
 @media (max-width: 720px) { .bar nav a:not(.tg) { display: none; } }
 .intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 32px; align-items: end; margin: 56px 0 28px; }
-.hero h1 { font: 600 clamp(26px, 3.6vw, 44px)/1.12 var(--sans); letter-spacing: -.02em; margin: 0; max-width: 16ch; text-wrap: balance; }
+.hero h1 { font: 800 clamp(26px, 4vw, 52px)/1.02 var(--sans); letter-spacing: -.035em; text-transform: uppercase; margin: 0; max-width: 14ch; text-wrap: balance; }
 .hero .lead { color: var(--muted); max-width: 46ch; margin: 0; }
 .hero .actions { margin-top: 18px; }
 @media (max-width: 720px) { .intro { grid-template-columns: 1fr; gap: 14px; margin: 30px 0 20px; } }
@@ -50,18 +50,27 @@ img { display: block; max-width: 100%; }
             background: transparent; color: var(--ink); text-decoration: none; font-size: 14px; font-weight: 500; }
 .btn-line::after { content: "»"; font-size: 16px; }
 .btn-line:hover { background: var(--ink); color: var(--bg); }
-.strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-.strip figure { margin: 0; }
-.strip .tile { aspect-ratio: 3/4; background: var(--surface); display: flex; align-items: center; justify-content: center; }
-.strip .tile img { width: 100%; height: 100%; object-fit: contain; padding: 18px; }
-.strip figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; text-align: center; }
-@media (max-width: 720px) { .strip { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
 /* в Telegram сразу к каталогу */
 .in-tg .hero { padding: 12px 0 0; }
 .in-tg .intro { margin: 14px 0 6px; }
-.in-tg .hero h1 { font-size: 24px; }
+.in-tg .hero h1 { font-size: 22px; }
 .in-tg .hero .lead { font-size: 14px; }
-.in-tg .hero .actions, .in-tg .strip, .in-tg .bar nav { display: none; }
+.in-tg .hero .actions, .in-tg .bar nav, .in-tg .intro .lead { display: none; }
+
+/* хайлайты категорий — как круги сторис в профиле @maryeefi */
+.highlights { display: flex; gap: 18px; overflow-x: auto; scrollbar-width: none; padding: 4px 2px 26px; }
+.highlights::-webkit-scrollbar { display: none; }
+.hl { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 82px; border: 0; background: none; padding: 0; }
+.hl .ring { width: 78px; height: 78px; border-radius: 50%; padding: 3px; border: 1px solid var(--line-strong); background: var(--bg); }
+.hl .ring span { display: block; width: 100%; height: 100%; border-radius: 50%; background: var(--surface); overflow: hidden; }
+.hl img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.35); }
+.hl img.mono { object-fit: contain; transform: none; padding: 22px; opacity: .5; }
+.hl .lbl { font-size: 13px; color: var(--ink); white-space: nowrap; }
+.hl[aria-pressed="true"] .ring { border: 2px solid var(--brand); padding: 2px; }
+@media (hover: hover) { .hl:hover .ring { border-color: var(--brand); } }
+.in-tg .highlights { padding-bottom: 6px; }
+.in-tg .hl .ring { width: 66px; height: 66px; }
+.in-tg .hl { width: 70px; }
 
 /* ── Каталог ── */
 .catalog { padding: 64px 0 140px; }
@@ -187,7 +196,7 @@ img { display: block; max-width: 100%; }
                 <div class="actions"><a class="btn-line" href="#catalog">Смотреть каталог</a></div>
             </div>
         </div>
-        <div class="strip" id="strip" aria-hidden="true"></div>
+        <nav class="highlights" id="highlights" aria-label="Категории"></nav>
     </div>
 </header>
 
@@ -286,7 +295,7 @@ img { display: block; max-width: 100%; }
     fetch("api/catalog").then(function (r) { if (!r.ok) throw r; return r.json(); }).then(function (data) {
         products = data;
         $("count").textContent = data.length + " моделей с ценами фабрики Л'Арт";
-        buildStrip(); buildChips(); renderGrid();
+        buildHighlights(); buildChips(); renderGrid();
         openFromHash();
     }).catch(function () {
         $("count").textContent = "Каталог не загрузился. Проверьте интернет и обновите страницу.";
@@ -294,15 +303,21 @@ img { display: block; max-width: 100%; }
 
     function uniq(a) { return a.filter(function (v, i) { return v && a.indexOf(v) === i; }); }
 
-    function buildStrip() {
-        var picks = uniq(products.map(function (p) { return p.category; })).slice(0, 4).map(function (c) {
-            return products.find(function (p) { return p.category === c && p.photos.length; });
-        }).filter(Boolean);
-        $("strip").innerHTML = picks.map(function (p) {
-            var n = products.filter(function (x) { return x.category === p.category; }).length;
-            return '<figure><div class="tile"><img src="' + esc(p.photos[0]) + '" alt=""></div><figcaption>' + esc(p.category.toLowerCase()) + ' [' + n + ']</figcaption></figure>';
+    function buildHighlights() {
+        var cats = uniq(products.map(function (p) { return p.category; }));
+        $("highlights").innerHTML = cats.map(function (c) {
+            var p = products.find(function (x) { return x.category === c && x.photos.length; });
+            return '<button type="button" class="hl" data-c="' + esc(c) + '" aria-pressed="false"><span class="ring"><span>' +
+                (p ? '<img src="' + esc(p.photos[0]) + '" alt="" loading="lazy">' : '<img class="mono" src="brand/favicon.svg" alt="">') + '</span></span><span class="lbl">' + esc(c) + "</span></button>";
         }).join("");
-        gsap.from("#strip .tile img", { scale: 1.06, opacity: 0, duration: 1.1 * D, ease: "expo.out", stagger: .06 * D, delay: .2 * D });
+        $("highlights").querySelectorAll(".hl").forEach(function (b) { b.onclick = function () {
+            haptic(); pickCategory(b.dataset.c);
+            var top = $("catalog").getBoundingClientRect().top + scrollY;
+            lenis ? lenis.scrollTo(top, { duration: .9 }) : scrollTo({ top: top, behavior: reduce ? "auto" : "smooth" });
+        }; });
+    }
+    function syncHighlights() {
+        $("highlights").querySelectorAll(".hl").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.c === state.cat); });
     }
 
     // ── фильтры ──
@@ -338,7 +353,7 @@ img { display: block; max-width: 100%; }
         row.hidden = subs.length < 2;
         if (!row.hidden) chipRow(row, [{ label: "Все", value: "" }].concat(subs.map(function (s) { return { label: s, value: s }; })), state.sub, pickSub);
     }
-    function pickCategory(v) { state.cat = v; state.sub = ""; press($("cats"), v); buildSubs(); renderGrid(true); }
+    function pickCategory(v) { state.cat = v; state.sub = ""; press($("cats"), v); buildSubs(); syncHighlights(); renderGrid(true); }
     function pickSub(v) { state.sub = v; press($("subs"), v); renderGrid(true); }
 
     // ── сетка ──
@@ -621,6 +636,8 @@ img { display: block; max-width: 100%; }
             setCTA("Вернуться в каталог");
         }).catch(function (e) {
             sending = false; busy(false);
+            // на GitHub Pages сервера нет: заявку передаёт боту сам Telegram
+            if (e && e.message === "no-api" && inTelegram && tg.sendData) { tg.sendData(JSON.stringify(payload)); return; }
             fail(e && e.message === "no-api"
                 ? "Откройте каталог кнопкой «Каталог мебели» внизу чата с ботом — так заявка дойдёт консультанту"
                 : "Нет связи. Проверьте интернет и нажмите ещё раз");
