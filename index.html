@@ -12,6 +12,7 @@
 <style>
 /* Витрина «Наследие»: галерейная подача по образцу maryeefi.com на светлом фоне CRM */
 :root {
+    --tile: #EEF1F4;
     --bg: #F1F5F9; --surface: #FFFFFF; --surface2: #F8FAFC; --line: #E2E8F0; --line-strong: #0F172A;
     --ink: #0F172A; --muted: #475569; --soft: #5F6E82; --brand: #1F4A45; --danger: #B42318;
     --sans: "Manrope", "Golos Text", system-ui, sans-serif;
@@ -50,6 +51,8 @@ img { display: block; max-width: 100%; }
             background: transparent; color: var(--ink); text-decoration: none; font-size: 14px; font-weight: 500; }
 .btn-line::after { content: "»"; font-size: 16px; }
 .btn-line:hover { background: var(--ink); color: var(--bg); }
+/* Mini App: белый фон, как на сайте Марины Ефимовой (maryeefi.com) */
+.in-tg { --bg: #FAFAFA; --surface: #FFFFFF; --line: #EBEBEB; --line-strong: #111111; --ink: #111111; --muted: #6B6B6B; --soft: #888888; --tile: #F5F5F3; }
 /* в Telegram сразу к каталогу */
 .in-tg .hero { padding: 12px 0 0; }
 .in-tg .intro { margin: 14px 0 6px; }
@@ -61,9 +64,9 @@ img { display: block; max-width: 100%; }
 .highlights { display: flex; gap: 18px; overflow-x: auto; scrollbar-width: none; padding: 4px 2px 26px; }
 .highlights::-webkit-scrollbar { display: none; }
 .hl { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 82px; border: 0; background: none; padding: 0; }
-.hl .ring { width: 78px; height: 78px; border-radius: 50%; padding: 3px; border: 1px solid var(--line-strong); background: var(--bg); }
-.hl .ring span { display: block; width: 100%; height: 100%; border-radius: 50%; background: var(--surface); overflow: hidden; }
-.hl img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.35); }
+.hl .ring { width: 78px; height: 78px; border-radius: 50%; padding: 3px; border: 1px solid var(--line); background: var(--bg); transition: border-color .2s ease; }
+.hl .ring span { display: block; width: 100%; height: 100%; border-radius: 50%; background: var(--tile); overflow: hidden; }
+.hl img { width: 100%; height: 100%; object-fit: contain; object-position: center; padding: 12px 8px; mix-blend-mode: multiply; }
 .hl img.mono { object-fit: contain; transform: none; padding: 22px; opacity: .5; }
 .hl .lbl { font-size: 13px; color: var(--ink); white-space: nowrap; }
 .hl[aria-pressed="true"] .ring { border: 2px solid var(--brand); padding: 2px; }
@@ -94,8 +97,8 @@ img { display: block; max-width: 100%; }
 @media (max-width: 1000px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 10px; } }
 .card { display: block; width: 100%; border: 0; padding: 0; text-align: left; background: none; }
-.card .ph { aspect-ratio: 1; background: var(--surface); display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.card .ph img { width: 100%; height: 100%; object-fit: contain; padding: 14px; transition: transform .5s cubic-bezier(.2,.7,.2,1); }
+.card .ph { aspect-ratio: 1; background: var(--tile); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.card .ph img { width: 100%; height: 100%; object-fit: contain; padding: 14px; mix-blend-mode: multiply; transition: transform .5s cubic-bezier(.2,.7,.2,1); }
 .card .ph.none img { width: 40px; height: auto; opacity: .2; padding: 0; }
 @media (hover: hover) { .card:hover .ph img { transform: scale(1.04); } }
 .card .meta { padding: 10px 2px 0; }
@@ -107,13 +110,14 @@ img { display: block; max-width: 100%; }
 /* ── Модель ── */
 .sheet { position: fixed; inset: 0; z-index: 20; background: var(--bg); overflow-y: auto; visibility: hidden; overscroll-behavior: contain; }
 .sheet-in { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 48px; padding: 28px 0 140px; }
-@media (max-width: 900px) { .sheet-in { grid-template-columns: 1fr; gap: 0; padding-top: 0; width: 100%; } }
-.gallery { position: sticky; top: 28px; align-self: start; background: var(--surface); }
+@media (max-width: 900px) { .sheet-in { grid-template-columns: minmax(0, 1fr); gap: 0; padding-top: 0; width: 100%; } }
+.gallery, .info { min-width: 0; }  /* иначе колонка растягивается по ширине фото и правый край обрезается */
+.gallery { position: sticky; top: 28px; align-self: start; background: var(--tile); }
 @media (max-width: 900px) { .gallery { position: relative; top: 0; } }
 .track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
 .track::-webkit-scrollbar { display: none; }
 .slide { flex: 0 0 100%; scroll-snap-align: center; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
-.slide img { width: 100%; height: 100%; object-fit: contain; padding: 22px; }
+.slide img { width: 100%; height: 100%; object-fit: contain; padding: 22px; mix-blend-mode: multiply; }
 .counter { position: absolute; right: 14px; bottom: 12px; font-size: 13px; color: var(--muted); }
 .close { position: absolute; left: 12px; top: 12px; width: 44px; height: 44px; border: 1px solid var(--line); background: var(--surface);
          display: flex; align-items: center; justify-content: center; }
@@ -279,8 +283,7 @@ img { display: block; max-width: 100%; }
         document.body.classList.add("in-tg");
         tg.ready(); tg.expand();
         if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
-        if (tg.colorScheme === "dark") document.documentElement.dataset.theme = "dark";
-        try { var bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim(); tg.setHeaderColor(bg); tg.setBackgroundColor(bg); } catch (e) {}
+        try { var bg = getComputedStyle(document.body).getPropertyValue("--bg").trim(); tg.setHeaderColor(bg); tg.setBackgroundColor(bg); } catch (e) {}
     }
 
     // Lenis — плавная прокрутка на компьютере; в Telegram прокрутку ведёт сам клиент
