@@ -102,6 +102,10 @@ img { display: block; max-width: 100%; }
 .card .ph.none img { width: 40px; height: auto; opacity: .2; padding: 0; }
 @media (hover: hover) { .card:hover .ph img { transform: scale(1.04); } }
 .card .meta { padding: 10px 2px 0; }
+.card { position: relative; }
+.badges { position: absolute; left: 8px; top: 8px; display: flex; gap: 4px; flex-wrap: wrap; z-index: 1; }
+.badge { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 3px 7px; background: var(--ink); color: #fff; }
+.badge.sale { background: #B42318; }
 .card .name { font-size: 14px; line-height: 1.35; }
 .card .price { margin-top: 3px; font-size: 14px; font-weight: 600; }
 .card .price .from { font-weight: 400; color: var(--muted); }
@@ -118,7 +122,12 @@ img { display: block; max-width: 100%; }
 .track::-webkit-scrollbar { display: none; }
 .slide { flex: 0 0 100%; scroll-snap-align: center; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
 .slide img { width: 100%; height: 100%; object-fit: contain; padding: 22px; mix-blend-mode: multiply; }
-.counter { position: absolute; right: 14px; bottom: 12px; font-size: 13px; color: var(--muted); }
+.thumbs { display: flex; gap: 6px; overflow-x: auto; padding: 8px; background: var(--bg); scrollbar-width: none; }
+.thumbs::-webkit-scrollbar { display: none; }
+.thumbs button { flex: 0 0 64px; height: 64px; padding: 0; border: 1px solid var(--line); background: var(--tile); }
+.thumbs button[aria-current="true"] { border: 1.5px solid var(--line-strong); }
+.thumbs img { width: 100%; height: 100%; object-fit: contain; padding: 4px; mix-blend-mode: multiply; }
+.counter { position: absolute; right: 14px; top: 14px; font-size: 13px; color: var(--muted); }
 .close { position: absolute; left: 12px; top: 12px; width: 44px; height: 44px; border: 1px solid var(--line); background: var(--surface);
          display: flex; align-items: center; justify-content: center; }
 .close svg path { stroke: var(--ink); }
@@ -131,6 +140,7 @@ img { display: block; max-width: 100%; }
          display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .total .sum { font-size: 26px; font-weight: 700; letter-spacing: -.01em; }
 .total .hint { color: var(--muted); font-size: 14px; }
+.picked { margin: 10px 0 0; font-size: 14px; } .picked:empty { display: none; } .picked b { font-weight: 600; }
 
 .block { margin-top: 28px; }
 .block h3 { font-size: 13px; margin: 0 0 4px; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
@@ -220,6 +230,7 @@ img { display: block; max-width: 100%; }
         <div class="gallery">
             <div class="track" id="track"></div>
             <div class="counter num" id="counter"></div>
+            <div class="thumbs" id="thumbs" aria-label="Все фото"></div>
             <button class="close" id="close" aria-label="Назад к каталогу">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
@@ -228,6 +239,7 @@ img { display: block; max-width: 100%; }
             <h2 id="d-name"></h2>
             <div class="where" id="d-where"></div>
             <div class="total"><span class="sum num" id="d-sum"></span><span class="hint" id="d-sum-hint"></span></div>
+            <p class="picked" id="d-picked"></p>
 
             <div id="cfg">
                 <div class="block" id="b-variants"><h3 id="v-title"></h3><p class="sub" id="v-sub"></p><div class="choices" id="variants"></div></div>
@@ -255,7 +267,9 @@ img { display: block; max-width: 100%; }
                 <p>Консультант свяжется с вами в ближайшее рабочее время.</p>
             </div>
 
-            <div class="block"><h3>Характеристики</h3><ul class="specs" id="d-specs"></ul><div class="desc" id="d-desc"></div></div>
+            <div class="block" id="b-terms"><h3>Сроки и условия</h3><ul class="specs" id="d-terms"></ul></div>
+            <div class="block"><h3>Характеристики</h3><ul class="specs" id="d-specs"></ul></div>
+            <div class="block" id="b-desc"><h3>Описание</h3><div class="desc" id="d-desc"></div></div>
         </div>
     </div>
 </section>
@@ -364,7 +378,8 @@ img { display: block; max-width: 100%; }
         var ph = p.photos[0]
             ? '<div class="ph' + (p.full[0] ? " full" : "") + '"><img src="' + esc(p.photos[0]) + '" alt="' + esc(p.name) + '" loading="lazy" data-flip-id="ph-' + p.id + '"></div>'
             : '<div class="ph none"><img src="brand/favicon.svg" alt=""></div>';
-        return '<button class="card" type="button" data-id="' + p.id + '">' + ph + '<div class="meta"><div class="name">' + esc(p.name) +
+        var badges = p.sale ? '<span class="badge sale">Распродажа</span>' : "";  // «склад» есть почти у всех — метка не выделяла бы ничего
+        return '<button class="card" type="button" data-id="' + p.id + '">' + (badges ? '<span class="badges">' + badges + "</span>" : "") + ph + '<div class="meta"><div class="name">' + esc(p.name) +
             '</div><div class="price num">' + (p.price ? '<span class="from">от</span> ' + rub(p.price) : '<span class="from">цена по запросу</span>') + "</div></div></button>";
     }
     function renderGrid(animate) {
@@ -393,6 +408,20 @@ img { display: block; max-width: 100%; }
                 (i === 0 && p.photos.length ? ' data-flip-id="ph-' + p.id + '"' : ' loading="lazy"') + "></div>";
         }).join("");
         $("track").scrollLeft = 0;
+        $("thumbs").innerHTML = photos.length > 1 ? photos.map(function (src, i) {
+            return '<button type="button" aria-label="Фото ' + (i + 1) + '" aria-current="' + (i === 0) + '" data-i="' + i + '"><img src="' + esc(src) + '" alt="" loading="lazy"></button>';
+        }).join("") : "";
+        $("thumbs").hidden = photos.length < 2;
+        $("thumbs").querySelectorAll("button").forEach(function (b) { b.onclick = function () {
+            var t = $("track"); t.scrollTo({ left: t.clientWidth * +b.dataset.i, behavior: reduce ? "auto" : "smooth" });
+        }; });
+        var notes = uniq(p.variants.map(function (v) { return v.note; }));
+        var terms = [];
+        if (p.stock) terms.push(["Со склада", "готовые модели в складской ткани — быстрее всего"]);
+        notes.forEach(function (n) { terms.push(["Изготовление", n]); });
+        terms.push(["Цена", "по прайсу фабрики Л'Арт, точную сумму подтвердит консультант"]);
+        $("d-terms").innerHTML = terms.map(function (t) { return "<li><span>" + esc(t[0]) + "</span><span>" + esc(t[1]) + "</span></li>"; }).join("");
+        $("b-desc").hidden = !p.description;
         $("counter").textContent = photos.length > 1 ? "1 / " + photos.length : "";
         $("counter").hidden = photos.length < 2;
         $("d-name").textContent = p.name;
@@ -435,7 +464,9 @@ img { display: block; max-width: 100%; }
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
     $("track").addEventListener("scroll", function () {
         var t = $("track"), n = t.children.length;
-        if (n > 1) $("counter").textContent = (Math.round(t.scrollLeft / t.clientWidth) + 1) + " / " + n;
+        var i = Math.round(t.scrollLeft / t.clientWidth);
+        if (n > 1) $("counter").textContent = (i + 1) + " / " + n;
+        $("thumbs").querySelectorAll("button").forEach(function (b) { b.setAttribute("aria-current", +b.dataset.i === i); });
     }, { passive: true });
 
     // ── конфигуратор ──
@@ -553,6 +584,8 @@ img { display: block; max-width: 100%; }
                 onUpdate: function () { $("d-sum").textContent = rub(shown.v); } });
             $("d-sum-hint").textContent = cfg.fabric ? fabricName(cfg.fabric).toLowerCase() + ", по прайсу фабрики" : "";
         }
+        var sel = selected().map(function (v) { return v.title + (p.modular ? " × " + cfg.items[v.id] : ""); });
+        $("d-picked").innerHTML = sel.length ? "<b>Выбрано:</b> " + esc(sel.join("; ")) + (cfg.fabric ? ", " + esc(fabricName(cfg.fabric).toLowerCase()) : "") : "";
         if (step === "cfg") setCTA("Оставить заявку", isReady());
     }
     function isReady() { return !current.variants.length || (selected().length > 0 && !!cfg.fabric); }
