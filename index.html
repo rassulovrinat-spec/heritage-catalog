@@ -619,8 +619,13 @@ img { display: block; max-width: 100%; }
             var part = "I" + id + "x" + payload.items[id];
             if ((code + part).length <= 64) code += part;
         });
-        tg.openTelegramLink("https://t.me/Heritage_content_bot?start=" + code);
-        setTimeout(function () { try { tg.close(); } catch (e) {} }, 300);
+        // показать результат, затем перейти в чат: Telegram отправит боту /start с кодом заявки
+        step = "done"; haptic("ok");
+        $("lead").hidden = true; $("cfg").hidden = true; $("done").hidden = false;
+        $("done").querySelector("p").textContent = "Открываем чат с консультантом — заявка уйдёт автоматически.";
+        $("done").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+        setCTA("Вернуться в каталог");
+        setTimeout(function () { tg.openTelegramLink("https://t.me/Heritage_content_bot?start=" + code); }, 900);
     }
     function submit() {
         if (sending) return;
@@ -633,7 +638,7 @@ img { display: block; max-width: 100%; }
                         fabric: cfg.fabric, items: cfg.items, options: cfg.options };
         if (!(tg && tg.initData)) {
             // открыто с кнопки клавиатуры: подписи нет, Telegram сам передаст заявку боту
-            if (inTelegram && tg.sendData) { tg.sendData(JSON.stringify(payload)); return; }
+            if (inTelegram && tg.sendData) { haptic("ok"); tg.sendData(JSON.stringify(payload)); return; }
             return fail("Заявку можно отправить из Telegram: откройте каталог в боте @Heritage_content_bot");
         }
         if (!onServer) return viaStartLink(payload);  // витрина на GitHub Pages: заявку оформит бот
