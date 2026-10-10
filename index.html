@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Наследие — мебель под ваш размер и ткань</title>
+<meta name="description" content="Каталог мебели салона «Наследие»: диваны, кресла, кровати. Выберите размер и ткань, цена считается сразу.">
+<link rel="icon" href="brand/favicon.svg" type="image/svg+xml">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="vendor/fonts/fonts.css" rel="stylesheet">
+<link href="vendor/lenis/lenis.css" rel="stylesheet">
+<style>
+:root {
+    --night: #17140F; --night-2: #221E18; --cream: #FBF7EF; --stone: #ECE7DE; --stone-2: #E2DCD1;
+    --ink: #1D1A15; --muted: #6B645A; --line: #DDD6CA; --brand: #1F4A45;
+    --glow: #E8A14B; --on-night: #F4EFE6; --on-night-muted: #A39C90; --danger: #A12C1F;
+    --display: "Unbounded", "Golos Text", system-ui, sans-serif; --sans: "Golos Text", system-ui, sans-serif;
+    --r-lg: 28px; --r-md: 18px; --r-sm: 12px;
+}
+[data-theme="dark"] {
+    --cream: #15120E; --stone: #221E18; --stone-2: #2C2720; --ink: #F1ECE3; --muted: #A39C90; --line: #3A342B; --danger: #F1A296;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--cream); color: var(--ink); font: 16px/1.5 var(--sans); }
+html { caret-color: var(--brand); scrollbar-color: var(--stone-2) transparent; }
+::selection { background: color-mix(in srgb, var(--glow) 35%, transparent); }
+button { font: inherit; color: inherit; cursor: pointer; }
+img { display: block; max-width: 100%; }
+:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
+.num { font-variant-numeric: tabular-nums; }
+.wrap { width: min(1240px, 100% - 40px); margin-inline: auto; }
+
+/* ── Первый экран ── */
+.hero { background: radial-gradient(120% 80% at 50% 0%, var(--night-2), var(--night) 60%); color: var(--on-night);
+        border-radius: 0 0 var(--r-lg) var(--r-lg); padding: 18px 0 40px; }
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.logo { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; font-weight: 600; }
+.logo img { width: 34px; height: 34px; border-radius: 9px; }
+.bar a.tg { color: var(--on-night); text-decoration: none; font-size: 14px; padding: 10px 16px; border-radius: 999px;
+            border: 1px solid color-mix(in srgb, var(--on-night) 22%, transparent); }
+.hero h1 { font: 700 clamp(34px, 7vw, 76px)/1.02 var(--display); letter-spacing: -.035em; text-transform: lowercase;
+           text-align: center; margin: 56px auto 18px; max-width: 14ch; text-wrap: balance; }
+.hero .lead { text-align: center; color: var(--on-night-muted); max-width: 46ch; margin: 0 auto; font-size: 17px; }
+.pill { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 26px;
+        border-radius: 999px; border: 0; background: var(--on-night); color: var(--night); font-weight: 600; text-decoration: none;
+        box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 10px 40px -6px color-mix(in srgb, var(--glow) 70%, transparent); }
+.hero .actions { display: flex; justify-content: center; margin: 28px 0 0; }
+.strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 44px; }
+.strip figure { margin: 0; }
+.strip figcaption { font-size: 13px; color: var(--on-night-muted); margin-bottom: 8px; text-align: center; }
+.strip .tile { aspect-ratio: 4/3; border-radius: var(--r-md); background: #fff; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.strip .tile img { width: 100%; height: 100%; object-fit: contain; padding: 10px; }
+@media (max-width: 720px) { .strip { grid-template-columns: repeat(2, 1fr); } .hero h1 { margin-top: 36px; } }
+/* в Telegram первый экран короче: клиент пришёл за каталогом */
+.in-tg .hero { padding: 14px 0 22px; }
+.in-tg .hero h1 { font-size: clamp(28px, 8.5vw, 40px); margin: 22px auto 10px; }
+.in-tg .hero .lead { font-size: 15px; }
+.in-tg .hero .actions, .in-tg .strip, .in-tg .bar a.tg { display: none; }
+
+/* ── Каталог ── */
+.catalog { padding: 34px 0 140px; }
+.catalog h2 { font: 700 clamp(28px, 4vw, 44px)/1.05 var(--display); letter-spacing: -.03em; text-transform: lowercase; margin: 0; }
+.catalog .count { color: var(--muted); margin: 6px 0 0; }
+.filters { position: sticky; top: 0; z-index: 5; padding: 14px 0 10px; margin: 8px 0 6px;
+           background: color-mix(in srgb, var(--cream) 90%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.chip-row { position: relative; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.chip-row::-webkit-scrollbar { display: none; }
+.chip { position: relative; z-index: 1; flex: 0 0 auto; min-height: 42px; padding: 0 18px; border: 0; border-radius: 999px;
+        background: transparent; color: var(--muted); font-weight: 500; transition: color .2s ease; }
+.chip[aria-pressed="true"] { color: var(--cream); }
+.pill-bg { position: absolute; z-index: 0; top: 0; left: 0; height: 42px; border-radius: 999px; background: var(--ink); }
+.chip-row.sub { margin-top: 8px; }
+.chip-row.sub .chip { min-height: 36px; font-size: 14px; }
+.chip-row.sub .pill-bg { height: 36px; background: var(--brand); }
+.chip-row.sub .chip[aria-pressed="true"] { color: #fff; }
+
+/* кладка: фото разной высоты, как в образце */
+.grid { columns: 4 260px; column-gap: 14px; margin-top: 12px; }
+.card { display: block; width: 100%; break-inside: avoid; margin: 0 0 14px; border: 0; padding: 0; text-align: left;
+        background: var(--stone); border-radius: var(--r-md); overflow: hidden; }
+.card .ph { background: #fff; padding: 12px; }
+.card .ph img { width: 100%; height: auto; }
+.card .ph.none { aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; }
+.card .ph.none img { width: 44px; opacity: .18; }
+.card .meta { padding: 12px 14px 15px; }
+.card .name { font-weight: 600; line-height: 1.3; }
+.card .price { margin-top: 4px; color: var(--muted); font-size: 14px; }
+.card .price b { color: var(--ink); font-weight: 600; }
+@media (hover: hover) { .card:hover { box-shadow: 0 14px 34px -18px rgba(23,20,15,.45); } }
+.card:active { transform: scale(.985); }
+@media (max-width: 560px) { .grid { columns: 2; column-gap: 10px; } .card { margin-bottom: 10px; } .card .meta { padding: 10px 11px 12px; } }
+.empty { color: var(--muted); padding: 30px 0; }
+
+/* ── Модель ── */
+.sheet { position: fixed; inset: 0; z-index: 20; background: var(--cream); overflow-y: auto; visibility: hidden; overscroll-behavior: contain; }
+.sheet-in { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 36px; padding: 24px 0 140px; }
+@media (max-width: 900px) { .sheet-in { grid-template-columns: 1fr; gap: 0; padding-top: 0; width: 100%; } }
+.gallery { position: sticky; top: 24px; align-self: start; background: #fff; border-radius: var(--r-lg); overflow: hidden; }
+@media (max-width: 900px) { .gallery { position: relative; top: 0; border-radius: 0 0 var(--r-lg) var(--r-lg); } }
+.track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.track::-webkit-scrollbar { display: none; }
+.slide { flex: 0 0 100%; scroll-snap-align: center; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; }
+.slide img { width: 100%; height: 100%; object-fit: contain; padding: 14px; }
+.counter { position: absolute; right: 14px; bottom: 12px; padding: 4px 11px; border-radius: 999px; font-size: 13px; background: rgba(23,20,15,.7); color: #fff; }
+.close { position: absolute; left: 12px; top: 12px; width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(255,255,255,.92);
+         box-shadow: 0 4px 14px -6px rgba(0,0,0,.35); display: flex; align-items: center; justify-content: center; }
+.in-tg .close { display: none; }
+.info { padding: 6px 2px 0; }
+@media (max-width: 900px) { .info { padding: 22px 20px 0; } }
+.info h2 { font: 700 clamp(26px, 3.4vw, 38px)/1.08 var(--display); letter-spacing: -.03em; margin: 0 0 8px; text-wrap: balance; }
+.where { color: var(--muted); font-size: 14px; }
+.total { margin: 18px 0 4px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.total .sum { font: 700 30px/1 var(--display); letter-spacing: -.02em; }
+.total .hint { color: var(--muted); font-size: 14px; }
+
+.block { margin-top: 26px; }
+.block h3 { font-size: 17px; font-weight: 600; margin: 0 0 4px; }
+.block .sub { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
+.choices { display: grid; gap: 8px; }
+.choice { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; min-height: 56px; text-align: left;
+          padding: 12px 14px; border-radius: var(--r-sm); border: 1.5px solid var(--line); background: var(--cream); }
+.choice[aria-pressed="true"] { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 7%, var(--cream)); }
+.choice .t { font-weight: 500; line-height: 1.35; }
+.choice .s { display: block; color: var(--muted); font-size: 13px; font-weight: 400; margin-top: 2px; }
+.choice .p { flex: 0 0 auto; font-size: 14px; color: var(--muted); }
+.tag { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 999px; background: color-mix(in srgb, var(--glow) 28%, transparent); color: var(--ink); margin-left: 6px; }
+.module { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.module:last-child { border-bottom: 0; }
+.module .t { font-weight: 500; line-height: 1.35; }
+.module .s { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+.stepper { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+.stepper button { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--cream); font-size: 20px; line-height: 1; }
+.stepper button:disabled { opacity: .35; cursor: default; }
+.stepper output { min-width: 26px; text-align: center; font-weight: 600; }
+.fabrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.fabric { min-height: 58px; text-align: left; padding: 10px 12px; border-radius: var(--r-sm); border: 1.5px solid var(--line); background: var(--cream); }
+.fabric[aria-pressed="true"] { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 7%, var(--cream)); }
+.fabric:disabled { opacity: .4; cursor: default; }
+.fabric .t { display: block; font-weight: 500; }
+.fabric .p { display: block; font-size: 13px; color: var(--muted); }
+.opt { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; cursor: pointer; }
+.opt input { width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--brand); flex: 0 0 auto; }
+
+.specs { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.specs li { display: flex; justify-content: space-between; gap: 16px; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.specs li span:first-child { color: var(--muted); }
+.specs li span:last-child { text-align: right; }
+.desc { color: var(--muted); white-space: pre-line; margin-top: 14px; max-width: 65ch; }
+
+.lead-form label { display: block; margin: 14px 0 6px; font-size: 14px; font-weight: 500; }
+.lead-form label span { color: var(--muted); font-weight: 400; }
+.lead-form input, .lead-form textarea { width: 100%; font: 16px/1.4 var(--sans); color: var(--ink); background: var(--cream);
+    border: 1.5px solid var(--line); border-radius: var(--r-sm); padding: 12px 14px; min-height: 50px; }
+.lead-form input:focus, .lead-form textarea:focus { outline: none; border-color: var(--brand); }
+.lead-form input[aria-invalid="true"] { border-color: var(--danger); }
+.share { margin-top: 8px; border: 0; background: none; color: var(--brand); font-weight: 500; padding: 6px 0; min-height: 40px; }
+[data-theme="dark"] .share { color: #8CC5BB; }
+.error { min-height: 22px; margin: 10px 0 0; color: var(--danger); font-size: 14px; }
+.done { margin-top: 26px; padding: 30px 22px; border-radius: var(--r-md); background: var(--stone); text-align: center; }
+.done svg { color: var(--brand); margin: 0 auto 6px; }
+.done h3 { font: 700 24px/1.15 var(--display); margin: 0 0 6px; }
+.done p { margin: 0; color: var(--muted); }
+
+.cta { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 30;
+       width: min(460px, 100% - 32px); min-height: 56px; border: 0; border-radius: 999px; background: var(--brand); color: #fff;
+       font-weight: 600; font-size: 16px; display: none; box-shadow: 0 14px 36px -12px color-mix(in srgb, var(--brand) 80%, transparent); }
+.cta:disabled { background: var(--stone-2); color: var(--muted); box-shadow: none; }
+@media (prefers-reduced-motion: reduce) { .card:active { transform: none; } }
+</style>
+</head>
+<body>
+<header class="hero">
+    <div class="wrap">
+        <div class="bar">
+            <a class="logo" href="./"><img src="brand/favicon.svg" alt=""><span>Наследие</span></a>
+            <a class="tg" href="https://t.me/Heritage_content_bot">Написать в Telegram</a>
+        </div>
+        <h1 id="title">мебель под ваш размер и ткань</h1>
+        <p class="lead">Выберите модель, размер и ткань: цену покажем сразу. Заявка уйдёт консультанту салона, он перезвонит.</p>
+        <div class="actions"><a class="pill" href="#catalog">Смотреть каталог</a></div>
+        <div class="strip" id="strip" aria-hidden="true"></div>
+    </div>
+</header>
+
+<main class="catalog" id="catalog">
+    <div class="wrap">
+        <h2>каталог</h2>
+        <p class="count" id="count">Загружаем модели…</p>
+        <nav class="filters" aria-label="Категории">
+            <div class="chip-row" id="cats"><div class="pill-bg"></div></div>
+            <div class="chip-row sub" id="subs" hidden><div class="pill-bg"></div></div>
+        </nav>
+        <div class="grid" id="grid" aria-live="polite"></div>
+    </div>
+</main>
+
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="d-name" data-lenis-prevent>
+    <div class="wrap sheet-in">
+        <div class="gallery">
+            <div class="track" id="track"></div>
+            <div class="counter num" id="counter"></div>
+            <button class="close" id="close" aria-label="Назад к каталогу">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D1A15" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+        </div>
+        <div class="info">
+            <h2 id="d-name"></h2>
+            <div class="where" id="d-where"></div>
+            <div class="total"><span class="sum num" id="d-sum"></span><span class="hint" id="d-sum-hint"></span></div>
+
+            <div id="cfg">
+                <div class="block" id="b-variants"><h3 id="v-title"></h3><p class="sub" id="v-sub"></p><div class="choices" id="variants"></div></div>
+                <div class="block" id="b-fabric"><h3>Ткань</h3>
+                    <p class="sub">Чем выше категория, тем дороже ткань. Цвет и образцы консультант пришлёт после заявки.</p>
+                    <div class="fabrics" id="fabrics"></div></div>
+                <div class="block" id="b-options" hidden><h3>Бесплатно по желанию</h3><p class="sub">Фабрика делает это без доплаты.</p><div id="options"></div></div>
+            </div>
+
+            <form class="block lead-form" id="lead" hidden novalidate>
+                <h3>Ваши контакты</h3>
+                <p class="sub">Консультант перезвонит, уточнит цвет ткани и сроки.</p>
+                <label for="f-name">Как к вам обращаться</label>
+                <input id="f-name" autocomplete="name" required minlength="2" maxlength="100">
+                <label for="f-phone">Телефон</label>
+                <input id="f-phone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="+7 900 123-45-67">
+                <button type="button" class="share" id="share" hidden>Подставить номер из Telegram</button>
+                <label for="f-comment">Пожелания <span>необязательно</span></label>
+                <textarea id="f-comment" rows="3" maxlength="600" placeholder="Цвет, когда удобно позвонить, адрес доставки"></textarea>
+                <p class="error" id="f-error" role="alert"></p>
+            </form>
+            <div class="done" id="done" hidden>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5" pathLength="1" stroke-dasharray="1"/></svg>
+                <h3>Заявка принята</h3>
+                <p>Консультант свяжется с вами в ближайшее рабочее время.</p>
+            </div>
+
+            <div class="block"><h3>Характеристики</h3><ul class="specs" id="d-specs"></ul><div class="desc" id="d-desc"></div></div>
+        </div>
+    </div>
+</section>
+
+<button class="cta" id="cta">Оставить заявку</button>
+
+<script src="vendor/gsap/gsap.min.js"></script>
+<script src="vendor/gsap/Flip.min.js"></script>
+<script src="vendor/lenis/lenis.min.js"></script>
+<script>
+(function () {
+    gsap.registerPlugin(Flip);
+    var tg = window.Telegram && Telegram.WebApp;
+    var inTelegram = !!(tg && tg.platform && tg.platform !== "unknown");
+    var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var D = reduce ? 0 : 1;
+    var $ = function (id) { return document.getElementById(id); };
+    var rub = function (n) { return Math.round(n).toLocaleString("ru-RU") + " ₽"; };
+    var esc = function (s) { var d = document.createElement("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; };
+    var haptic = function (k) { try { if (!tg || !tg.HapticFeedback) return;
+        k === "tap" ? tg.HapticFeedback.impactOccurred("light") : k === "ok" ? tg.HapticFeedback.notificationOccurred("success")
+        : k === "err" ? tg.HapticFeedback.notificationOccurred("error") : tg.HapticFeedback.selectionChanged(); } catch (e) {} };
+
+    if (inTelegram) {
+        document.body.classList.add("in-tg");
+        tg.ready(); tg.expand();
+        if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+        if (tg.colorScheme === "dark") document.documentElement.dataset.theme = "dark";
+        try { tg.setHeaderColor("#17140F"); tg.setBackgroundColor(getComputedStyle(document.documentElement).getPropertyValue("--cream").trim()); } catch (e) {}
+    }
+
+    // Lenis — плавная прокрутка на компьютере; в Telegram прокрутку ведёт сам клиент
+    var lenis = !reduce && !inTelegram && window.Lenis ? new Lenis({ autoRaf: false }) : null;
+    if (lenis) { gsap.ticker.add(function (t) { lenis.raf(t * 1000); }); gsap.ticker.lagSmoothing(0); }
+
+    // один постановочный момент при загрузке: заголовок и лента фото
+    gsap.from(".hero h1, .hero .lead, .hero .actions", { y: 22, opacity: 0, duration: .9 * D, ease: "expo.out", stagger: .08 * D });
+
+    var products = [], state = { cat: "", sub: "" }, current = null, cfg = null, step = "cfg";
+
+    fetch("api/catalog").then(function (r) { if (!r.ok) throw r; return r.json(); }).then(function (data) {
+        products = data;
+        $("count").textContent = data.length + " моделей с ценами фабрики Л'Арт";
+        buildStrip(); buildChips(); renderGrid();
+        openFromHash();
+    }).catch(function () {
+        $("count").textContent = "Каталог не загрузился. Проверьте интернет и обновите страницу.";
+    });
+
+    function uniq(a) { return a.filter(function (v, i) { return v && a.indexOf(v) === i; }); }
+
+    function buildStrip() {
+        var picks = uniq(products.map(function (p) { return p.category; })).slice(0, 4).map(function (c) {
+            return products.find(function (p) { return p.category === c && p.photos.length; });
+        }).filter(Boolean);
+        $("strip").innerHTML = picks.map(function (p) {
+            return '<figure><figcaption>' + esc(p.category) + '</figcaption><div class="tile"><img src="' + esc(p.photos[0]) + '" alt=""></div></figure>';
+        }).join("");
+        gsap.from("#strip figure", { y: 30, opacity: 0, duration: 1 * D, ease: "expo.out", stagger: .07 * D, delay: .25 * D });
+    }
+
+    // ── фильтры ──
+    function chipRow(row, values, active, onPick) {
+        row.querySelectorAll(".chip").forEach(function (c) { c.remove(); });
+        values.forEach(function (v) {
+            var b = document.createElement("button");
+            b.className = "chip"; b.textContent = v.label; b.dataset.value = v.value; b.type = "button";
+            b.setAttribute("aria-pressed", v.value === active);
+            b.onclick = function () { haptic(); onPick(v.value); };
+            row.appendChild(b);
+        });
+        movePill(row, false);
+    }
+    function movePill(row, animate) {
+        var on = row.querySelector('.chip[aria-pressed="true"]'), pill = row.querySelector(".pill-bg");
+        if (!on) return;
+        gsap.to(pill, { x: on.offsetLeft, width: on.offsetWidth, duration: animate ? .4 * D : 0, ease: "expo.out" });
+        if (animate) on.scrollIntoView({ inline: "center", block: "nearest", behavior: reduce ? "auto" : "smooth" });
+    }
+    function press(row, value) {
+        row.querySelectorAll(".chip").forEach(function (c) { c.setAttribute("aria-pressed", c.dataset.value === value); });
+        movePill(row, true);
+    }
+    function buildChips() {
+        chipRow($("cats"), [{ label: "Все", value: "" }].concat(uniq(products.map(function (p) { return p.category; }))
+            .map(function (c) { return { label: c, value: c }; })), state.cat, pickCategory);
+        buildSubs();
+    }
+    function buildSubs() {
+        var row = $("subs");
+        var subs = state.cat ? uniq(products.filter(function (p) { return p.category === state.cat; }).map(function (p) { return p.sub; })) : [];
+        row.hidden = subs.length < 2;
+        if (!row.hidden) chipRow(row, [{ label: "Все", value: "" }].concat(subs.map(function (s) { return { label: s, value: s }; })), state.sub, pickSub);
+    }
+    function pickCategory(v) { state.cat = v; state.sub = ""; press($("cats"), v); buildSubs(); renderGrid(true); }
+    function pickSub(v) { state.sub = v; press($("subs"), v); renderGrid(true); }
+
+    // ── сетка ──
+    function cardHTML(p) {
+        var ph = p.photos[0]
+            ? '<div class="ph"><img src="' + esc(p.photos[0]) + '" alt="' + esc(p.name) + '" loading="lazy" data-flip-id="ph-' + p.id + '"></div>'
+            : '<div class="ph none"><img src="brand/favicon.svg" alt=""></div>';
+        return '<button class="card" type="button" data-id="' + p.id + '">' + ph + '<div class="meta"><div class="name">' + esc(p.name) +
+            '</div><div class="price">' + (p.price ? 'от <b class="num">' + rub(p.price) + "</b>" : "цена по запросу") + "</div></div></button>";
+    }
+    function renderGrid(animate) {
+        var list = products.filter(function (p) { return (!state.cat || p.category === state.cat) && (!state.sub || p.sub === state.sub); });
+        var grid = $("grid");
+        var draw = function () {
+            grid.innerHTML = list.length ? list.map(cardHTML).join("") : '<p class="empty">В этой категории пока нет моделей.</p>';
+            grid.querySelectorAll(".card").forEach(function (c) { c.onclick = function () { open(+c.dataset.id, c); }; });
+        };
+        if (!animate || reduce) return draw();
+        gsap.to(grid, { opacity: 0, duration: .15, ease: "power1.in", onComplete: function () {
+            draw();
+            gsap.fromTo(grid, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: .45, ease: "expo.out" });
+        } });
+    }
+
+    // ── модель ──
+    function open(id, card) {
+        var p = products.find(function (x) { return x.id === id; });
+        if (!p) return;
+        current = p; step = "cfg"; haptic("tap");
+        if (history.replaceState) history.replaceState(null, "", "#m" + p.id);
+        var photos = p.photos.length ? p.photos : ["brand/favicon.svg"];
+        $("track").innerHTML = photos.map(function (src, i) {
+            return '<div class="slide"><img src="' + esc(src) + '" alt="' + esc(p.name) + ", фото " + (i + 1) + '"' +
+                (i === 0 && p.photos.length ? ' data-flip-id="ph-' + p.id + '"' : ' loading="lazy"') + "></div>";
+        }).join("");
+        $("track").scrollLeft = 0;
+        $("counter").textContent = photos.length > 1 ? "1 / " + photos.length : "";
+        $("counter").hidden = photos.length < 2;
+        $("d-name").textContent = p.name;
+        $("d-where").textContent = p.category + (p.sub && p.sub !== p.category ? ", " + p.sub.toLowerCase() : "");
+        $("d-specs").innerHTML = Object.keys(p.specs).map(function (k) {
+            return "<li><span>" + esc(k) + "</span><span>" + esc(p.specs[k]) + "</span></li>";
+        }).join("") || "<li><span>Характеристики уточнит консультант</span><span></span></li>";
+        $("d-desc").textContent = p.description;
+        $("lead").hidden = true; $("done").hidden = true; $("f-error").textContent = ""; $("f-comment").value = "";
+        $("cfg").hidden = false;
+        setupConfig(p);
+
+        var sheet = $("sheet"), from = card && card.querySelector("img[data-flip-id]");
+        var flipState = from && !reduce ? Flip.getState(from) : null;
+        sheet.scrollTop = 0;
+        gsap.set(sheet, { autoAlpha: 1, y: 0 });
+        if (lenis) lenis.stop();
+        document.body.style.overflow = "hidden";
+        if (flipState) Flip.from(flipState, { targets: sheet.querySelector(".slide img"), duration: .55, ease: "expo.inOut", absolute: true });
+        else gsap.from(".gallery", { opacity: 0, duration: .3 * D });
+        gsap.from(".info > *", { y: 14, opacity: 0, duration: .5 * D, ease: "expo.out", stagger: .03 * D, delay: .1 * D });
+        showCTA(true);
+        if (tg && tg.BackButton) tg.BackButton.show();
+    }
+
+    function close() {
+        if (!current) return;
+        current = null;
+        if (history.replaceState) history.replaceState(null, "", location.pathname);
+        gsap.to("#sheet", { autoAlpha: 0, y: 18, duration: .2 * D, ease: "power2.in", onComplete: function () {
+            document.body.style.overflow = ""; if (lenis) lenis.start();
+        } });
+        showCTA(false);
+        if (tg && tg.BackButton) tg.BackButton.hide();
+    }
+    function openFromHash() { var m = location.hash.match(/^#m(\d+)$/); if (m) open(+m[1]); }
+
+    $("close").onclick = close;
+    if (tg && tg.BackButton) tg.BackButton.onClick(function () { step === "form" ? backToConfig() : close(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+    $("track").addEventListener("scroll", function () {
+        var t = $("track"), n = t.children.length;
+        if (n > 1) $("counter").textContent = (Math.round(t.scrollLeft / t.clientWidth) + 1) + " / " + n;
+    }, { passive: true });
+
+    // ── конфигуратор ──
+    // cfg.items: {id варианта: количество}; обычная модель — один вариант, модульная — набор модулей
+    function fabricName(label) {
+        if (label === "Склад") return "Со склада";
+        var m = label.match(/ЗК\s*(\d+)/);
+        return m ? "Категория " + m[1] : label;
+    }
+    function setupConfig(p) {
+        cfg = { items: {}, fabric: "", options: [] };
+        var vs = p.variants;
+        $("b-variants").hidden = !vs.length; $("b-fabric").hidden = !vs.length;
+        renderOptions(p);
+        if (!vs.length) { updateTotal(); return; }
+        $("v-title").textContent = p.modular ? "Соберите комплект" : vs.length > 1 ? "Размер и исполнение" : "Исполнение";
+        $("v-sub").textContent = "Начните с готового комплекта или добавьте модули по одному.";
+        $("v-sub").hidden = !p.modular;
+        if (p.modular) {
+            var preset = vs.find(function (v) { return v.preset; });
+            if (preset) cfg.items[preset.id] = 1;
+        } else if (vs.length === 1) cfg.items[vs[0].id] = 1;
+        renderVariants();
+        var avail = availableFabrics();
+        if (avail.length) cfg.fabric = cheapestFabric(avail);
+        renderFabrics(); updateTotal();
+    }
+    function variantSub(v) {
+        var bits = [];
+        if (v.stock_fabric) bits.push("Склад: " + v.stock_fabric.replace(/^Основа\s*:\s*/i, "ткань "));
+        if (v.note) bits.push(v.note);
+        return bits.join(". ");
+    }
+    function minPrice(v) { var a = Object.values(v.prices); return a.length ? Math.min.apply(null, a) : 0; }
+    function renderVariants() {
+        var p = current, box = $("variants");
+        if (p.modular) {
+            box.innerHTML = p.variants.map(function (v) {
+                var q = cfg.items[v.id] || 0, sub = variantSub(v);
+                return '<div class="module"><div><div class="t">' + esc(v.title) + (v.preset ? '<span class="tag">готовый</span>' : "") +
+                    (v.sale ? '<span class="tag">распродажа</span>' : "") + '</div><span class="s">' + esc(sub) + (sub ? ". " : "") +
+                    "от " + rub(minPrice(v)) + '</span></div><div class="stepper">' +
+                    '<button type="button" aria-label="Убрать: ' + esc(v.title) + '" data-v="' + v.id + '" data-d="-1"' + (q ? "" : " disabled") + '>−</button>' +
+                    '<output class="num" aria-live="polite">' + q + '</output>' +
+                    '<button type="button" aria-label="Добавить: ' + esc(v.title) + '" data-v="' + v.id + '" data-d="1">+</button></div></div>';
+            }).join("");
+            box.querySelectorAll(".stepper button").forEach(function (b) { b.onclick = function () {
+                var id = +b.dataset.v, q = Math.max(0, Math.min(20, (cfg.items[id] || 0) + +b.dataset.d));
+                if (q) cfg.items[id] = q; else delete cfg.items[id];
+                haptic(); afterItemsChange();
+            }; });
+        } else {
+            box.innerHTML = p.variants.map(function (v) {
+                return '<button type="button" class="choice" data-v="' + v.id + '" aria-pressed="' + !!cfg.items[v.id] + '"><span><span class="t">' + esc(v.title) +
+                    (v.sale ? '<span class="tag">распродажа</span>' : "") + '</span><span class="s">' + esc(variantSub(v)) + '</span></span>' +
+                    '<span class="p num">от ' + rub(minPrice(v)) + "</span></button>";
+            }).join("");
+            box.querySelectorAll(".choice").forEach(function (b) { b.onclick = function () {
+                cfg.items = {}; cfg.items[+b.dataset.v] = 1; haptic(); afterItemsChange();
+            }; });
+        }
+    }
+    function afterItemsChange() {
+        renderVariants();
+        var avail = availableFabrics();
+        if (avail.indexOf(cfg.fabric) < 0) cfg.fabric = avail.length ? cheapestFabric(avail) : "";
+        renderFabrics(); updateTotal();
+    }
+    function selected() { return current.variants.filter(function (v) { return cfg.items[v.id]; }); }
+    function allFabrics() {
+        var all = [];
+        current.variants.forEach(function (v) { Object.keys(v.prices).forEach(function (k) { if (all.indexOf(k) < 0) all.push(k); }); });
+        return all;
+    }
+    function availableFabrics() {
+        var sel = selected();
+        return sel.length ? allFabrics().filter(function (k) { return sel.every(function (v) { return v.prices[k] != null; }); }) : [];
+    }
+    function sumFor(fabric) { return selected().reduce(function (s, v) { return s + (v.prices[fabric] || 0) * cfg.items[v.id]; }, 0); }
+    function cheapestFabric(avail) { return avail.reduce(function (a, b) { return sumFor(b) < sumFor(a) ? b : a; }); }
+    function renderFabrics() {
+        var avail = availableFabrics();
+        $("fabrics").innerHTML = allFabrics().map(function (k) {
+            var on = avail.indexOf(k) >= 0;
+            return '<button type="button" class="fabric" data-f="' + esc(k) + '" aria-pressed="' + (k === cfg.fabric) + '"' + (on ? "" : " disabled") +
+                '><span class="t">' + esc(fabricName(k)) + '</span><span class="p num">' +
+                (on ? rub(sumFor(k)) : selected().length ? "нет для выбранного" : "сначала выберите размер") + "</span></button>";
+        }).join("");
+        $("fabrics").querySelectorAll(".fabric").forEach(function (b) { b.onclick = function () {
+            cfg.fabric = b.dataset.f; haptic(); renderFabrics(); updateTotal();
+        }; });
+    }
+    function renderOptions(p) {
+        $("b-options").hidden = !p.options.length;
+        $("options").innerHTML = p.options.map(function (o, i) {
+            return '<label class="opt"><input type="checkbox" data-o="' + i + '"><span>' + esc(o) + "</span></label>";
+        }).join("");
+        $("options").querySelectorAll("input").forEach(function (c) { c.onchange = function () {
+            cfg.options = [].slice.call($("options").querySelectorAll("input:checked")).map(function (x) { return p.options[+x.dataset.o]; });
+            haptic();
+        }; });
+    }
+    var shown = { v: 0 };
+    function updateTotal() {
+        var p = current;
+        if (!p.variants.length) {
+            $("d-sum").textContent = "Цена по запросу"; $("d-sum-hint").textContent = "консультант рассчитает после заявки";
+        } else if (!selected().length) {
+            gsap.killTweensOf(shown);
+            $("d-sum").textContent = p.price ? "от " + rub(p.price) : "Цена по запросу";
+            $("d-sum-hint").textContent = p.modular ? "добавьте модули" : "выберите размер";
+        } else {
+            var total = sumFor(cfg.fabric);
+            gsap.to(shown, { v: total, duration: .45 * D, ease: "expo.out", overwrite: true,
+                onUpdate: function () { $("d-sum").textContent = rub(shown.v); } });
+            $("d-sum-hint").textContent = cfg.fabric ? fabricName(cfg.fabric).toLowerCase() + ", по прайсу фабрики" : "";
+        }
+        if (step === "cfg") setCTA("Оставить заявку", isReady());
+    }
+    function isReady() { return !current.variants.length || (selected().length > 0 && !!cfg.fabric); }
+
+    // ── заявка ──
+    function setCTA(text, enabled) {
+        if (enabled === undefined) enabled = true;
+        $("cta").textContent = text; $("cta").disabled = !enabled;
+        if (inTelegram && tg.MainButton) {
+            tg.MainButton.setParams({ text: text, color: enabled ? "#1F4A45" : "#9A938A", text_color: "#FFFFFF", is_active: enabled });
+        }
+    }
+    function showCTA(on) {
+        if (inTelegram && tg.MainButton) { on ? tg.MainButton.show() : tg.MainButton.hide(); return; }
+        $("cta").style.display = on ? "block" : "none";
+        if (on) gsap.fromTo("#cta", { y: 70 }, { y: 0, duration: .45 * D, ease: "expo.out" });
+    }
+    function onCTA() {
+        if (!current) return;
+        if (step === "cfg") { if (!isReady()) return; return showForm(); }
+        if (step === "form") return submit();
+        if (step === "done") return close();
+    }
+    if (tg && tg.MainButton) tg.MainButton.onClick(onCTA);
+    $("cta").onclick = onCTA;
+
+    function showForm() {
+        step = "form"; haptic("tap");
+        var form = $("lead"); form.hidden = false;
+        var user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+        if (user && !$("f-name").value) $("f-name").value = [user.first_name, user.last_name].filter(Boolean).join(" ");
+        $("share").hidden = !(inTelegram && tg.requestContact && tg.isVersionAtLeast && tg.isVersionAtLeast("6.9"));
+        gsap.from(form, { y: 14, opacity: 0, duration: .45 * D, ease: "expo.out" });
+        setCTA("Отправить заявку");
+        form.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+        setTimeout(function () { ($("f-name").value ? $("f-phone") : $("f-name")).focus({ preventScroll: true }); }, reduce ? 0 : 400);
+    }
+    function backToConfig() { step = "cfg"; $("lead").hidden = true; updateTotal(); }
+
+    $("share").onclick = function () {
+        tg.requestContact(function (ok, res) {
+            var phone = ok && res && res.responseUnsafe && res.responseUnsafe.contact && res.responseUnsafe.contact.phone_number;
+            if (phone) { $("f-phone").value = (phone.charAt(0) === "+" ? "" : "+") + phone; $("f-error").textContent = ""; haptic("ok"); }
+        });
+    };
+
+    function fail(msg, field) {
+        $("f-error").textContent = msg;
+        ["f-name", "f-phone"].forEach(function (id) { $(id).removeAttribute("aria-invalid"); });
+        if (field) { $(field).setAttribute("aria-invalid", "true"); $(field).focus(); }
+        haptic("err");
+    }
+    function busy(on) {
+        $("cta").disabled = on;
+        if (inTelegram && tg.MainButton) { if (on) tg.MainButton.showProgress(false); else tg.MainButton.hideProgress(); }
+    }
+    var sending = false;
+    function submit() {
+        if (sending) return;
+        var name = $("f-name").value.trim(), phone = $("f-phone").value.trim();
+        if (name.length < 2) return fail("Напишите, как к вам обращаться", "f-name");
+        var digits = phone.replace(/\D/g, "");
+        if (digits.length < 10 || digits.length > 15) return fail("Проверьте номер, например +7 900 123-45-67", "f-phone");
+        $("f-error").textContent = "";
+        var payload = { product_id: current.id, name: name, phone: phone, comment: $("f-comment").value.trim().slice(0, 600),
+                        fabric: cfg.fabric, items: cfg.items, options: cfg.options };
+        if (!(tg && tg.initData)) {
+            // открыто с кнопки клавиатуры: подписи нет, Telegram сам передаст заявку боту
+            if (inTelegram && tg.sendData) { tg.sendData(JSON.stringify(payload)); return; }
+            return fail("Заявку можно отправить из Telegram: откройте каталог в боте @Heritage_content_bot");
+        }
+        sending = true; busy(true);
+        fetch("api/lead", { method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(Object.assign({ init_data: tg.initData }, payload)) })
+        .then(function (r) { return r.json().catch(function () { throw new Error("no-api"); }).then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (res) {
+            sending = false; busy(false);
+            if (!res.ok) return fail(typeof res.j.detail === "string" ? res.j.detail : "Проверьте поля формы");
+            step = "done"; haptic("ok");
+            $("lead").hidden = true; $("cfg").hidden = true; $("done").hidden = false;
+            $("done").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+            gsap.from("#done", { scale: .97, opacity: 0, duration: .5 * D, ease: "expo.out" });
+            gsap.fromTo("#done svg path", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: .45 * D, delay: .15 * D });
+            setCTA("Вернуться в каталог");
+        }).catch(function (e) {
+            sending = false; busy(false);
+            fail(e && e.message === "no-api"
+                ? "Откройте каталог кнопкой «Каталог мебели» внизу чата с ботом — так заявка дойдёт консультанту"
+                : "Нет связи. Проверьте интернет и нажмите ещё раз");
+        });
+    }
+
+    addEventListener("resize", function () { movePill($("cats"), false); if (!$("subs").hidden) movePill($("subs"), false); });
+})();
+</script>
+</body>
+</html>
