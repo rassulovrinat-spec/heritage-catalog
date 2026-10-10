@@ -64,7 +64,7 @@ img { display: block; max-width: 100%; }
 .hl { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 82px; border: 0; background: none; padding: 0; }
 .hl .ring { width: 78px; height: 78px; border-radius: 50%; padding: 3px; border: 1px solid var(--line); background: var(--bg); transition: border-color .2s ease; }
 .hl .ring span { display: block; width: 100%; height: 100%; border-radius: 50%; background: var(--tile); overflow: hidden; }
-.hl img { width: 100%; height: 100%; object-fit: contain; object-position: center; padding: 12px 8px; mix-blend-mode: multiply; }
+.hl img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; mix-blend-mode: multiply; }  /* фото на белом фоне с ровными полями: мебель на весь круг, одного масштаба */
 .hl img.mono { object-fit: contain; transform: none; padding: 22px; opacity: .5; }
 .hl .lbl { font-size: 13px; color: var(--ink); white-space: nowrap; }
 .hl[aria-pressed="true"] .ring { border: 2px solid var(--brand); padding: 2px; }
@@ -323,9 +323,11 @@ img { display: block; max-width: 100%; }
     function buildHighlights() {
         var cats = uniq(products.map(function (p) { return p.category; }));
         $("highlights").innerHTML = cats.map(function (c) {
-            var p = products.find(function (x) { return x.category === c && x.photos.length; });
+            var inCat = products.filter(function (x) { return x.category === c; }), photo = "";
+            inCat.some(function (x) { return x.photos.some(function (f) { return f.indexOf("/white/") > -1 && (photo = f); }); });
+            photo = photo || (inCat.find(function (x) { return x.photos.length; }) || { photos: [""] }).photos[0];
             return '<button type="button" class="hl" data-c="' + esc(c) + '" aria-pressed="false"><span class="ring"><span>' +
-                (p ? '<img src="' + esc(p.photos[0]) + '" alt="" loading="lazy">' : '<img class="mono" src="brand/favicon.svg" alt="">') + '</span></span><span class="lbl">' + esc(c) + "</span></button>";
+                (photo ? '<img src="' + esc(photo) + '" alt="" loading="lazy">' : '<img class="mono" src="brand/favicon.svg" alt="">') + '</span></span><span class="lbl">' + esc(c) + "</span></button>";
         }).join("");
         $("highlights").querySelectorAll(".hl").forEach(function (b) { b.onclick = function () {
             haptic(); pickCategory(b.dataset.c);
