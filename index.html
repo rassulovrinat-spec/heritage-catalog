@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
 <title>Наследие — мебель под ваш размер и ткань</title>
 <meta name="description" content="Каталог мебели салона «Наследие»: диваны, кресла, кровати. Выберите размер и ткань, цена считается сразу.">
 <link rel="icon" href="brand/favicon.svg" type="image/svg+xml">
@@ -17,11 +18,8 @@
     --ink: #0F172A; --muted: #475569; --soft: #5F6E82; --brand: #1F4A45; --danger: #B42318;
     --sans: "Manrope", "Golos Text", system-ui, sans-serif;
 }
-[data-theme="dark"] {
-    --bg: #0F172A; --surface: #1E293B; --surface2: #172033; --line: #334155; --line-strong: #F1F5F9;
-    --ink: #F1F5F9; --muted: #CBD5E1; --soft: #94A3B8; --brand: #4FA597; --danger: #FDA29B;
-}
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { color-scheme: light; }
 html, body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.6 var(--sans); }
 html { caret-color: var(--brand); scrollbar-color: var(--line) transparent; }
 ::selection { background: color-mix(in srgb, var(--brand) 20%, transparent); }
