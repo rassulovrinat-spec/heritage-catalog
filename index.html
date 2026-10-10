@@ -607,6 +607,20 @@ img { display: block; max-width: 100%; }
         if (inTelegram && tg.MainButton) { if (on) tg.MainButton.showProgress(false); else tg.MainButton.hideProgress(); }
     }
     var sending = false;
+    // своего сервера у витрины на GitHub Pages нет — заявки принимает бот
+    var onServer = !/github\.io$/.test(location.hostname);
+    // Открыто из меню/инлайн-кнопки (sendData недоступен): передаём выбор ссылкой t.me/бот?start=…
+    // Формат (≤64 символа A-Za-z0-9_-): L<товар>F<ткань: s|номер ЗК|0>P<телефон>[I<вариант>x<кол-во>]…
+    function viaStartLink(payload) {
+        var f = payload.fabric === "Склад" ? "s" : ((payload.fabric.match(/ЗК\s*(\d+)/) || [0, "0"])[1]);
+        var code = "L" + payload.product_id + "F" + f + "P" + payload.phone.replace(/\D/g, "");
+        Object.keys(payload.items).forEach(function (id) {
+            var part = "I" + id + "x" + payload.items[id];
+            if ((code + part).length <= 64) code += part;
+        });
+        tg.openTelegramLink("https://t.me/Heritage_content_bot?start=" + code);
+        setTimeout(function () { try { tg.close(); } catch (e) {} }, 300);
+    }
     function submit() {
         if (sending) return;
         var name = $("f-name").value.trim(), phone = $("f-phone").value.trim();
@@ -621,6 +635,7 @@ img { display: block; max-width: 100%; }
             if (inTelegram && tg.sendData) { tg.sendData(JSON.stringify(payload)); return; }
             return fail("Заявку можно отправить из Telegram: откройте каталог в боте @Heritage_content_bot");
         }
+        if (!onServer) return viaStartLink(payload);  // витрина на GitHub Pages: заявку оформит бот
         sending = true; busy(true);
         fetch("api/lead", { method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify(Object.assign({ init_data: tg.initData }, payload)) })
