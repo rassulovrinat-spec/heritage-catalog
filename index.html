@@ -198,6 +198,48 @@ img { display: block; max-width: 100%; }
 .done h3 { font-size: 20px; margin: 0 0 6px; text-transform: none; letter-spacing: 0; }
 .done p { margin: 0; color: var(--muted); }
 
+/* шапка: избранное и корзина */
+.bar-right { display: flex; align-items: center; gap: 18px; }
+.icon-btn { position: relative; width: 44px; height: 44px; border: 0; background: none; color: var(--ink); display: flex; align-items: center; justify-content: center; }
+.icon-btn .count { position: absolute; top: 4px; right: 2px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--brand); color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; }
+.in-tg .bar .bar-right nav { display: none; }
+/* инструменты каталога */
+.tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 10px 0; }
+.tools input[type=search], .tools select { font: 15px var(--sans); height: 42px; padding: 0 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 0; }
+.tools input[type=search] { flex: 1 1 220px; min-width: 0; }
+.only-fav { display: flex; align-items: center; gap: 6px; font-size: 14px; height: 42px; padding: 0 6px; cursor: pointer; }
+.only-fav input { width: 18px; height: 18px; accent-color: var(--ink); }
+/* карточка: сердечко, размеры */
+.card .heart-mini { position: absolute; right: 8px; top: 8px; z-index: 2; width: 38px; height: 38px; border: 0; border-radius: 50%; background: rgba(255,255,255,.9); color: var(--ink); display: flex; align-items: center; justify-content: center; }
+.card .heart-mini[aria-pressed="true"], .heart[aria-pressed="true"] { color: #C0392B; }
+.card .heart-mini[aria-pressed="true"] svg, .heart[aria-pressed="true"] svg { fill: currentColor; }
+.card .spec { margin-top: 2px; font-size: 12px; color: var(--muted); }
+.badge.new { background: var(--brand); }
+/* модель: в корзину / в избранное */
+.buy-row { display: flex; gap: 8px; margin-top: 14px; }
+.buy-row .btn-line { flex: 1; justify-content: center; min-height: 48px; }
+.buy-row .btn-line::after { content: none; }
+.buy-row .btn-line:disabled { opacity: .4; cursor: default; }
+.heart { width: 48px; height: 48px; border: 1px solid var(--line-strong); background: transparent; color: var(--ink); display: flex; align-items: center; justify-content: center; }
+/* корзина */
+.cart { position: fixed; inset: 0; z-index: 40; background: rgba(15,23,42,.35); display: flex; justify-content: flex-end; }
+.cart[hidden] { display: none; }
+.cart-in { width: min(460px, 100%); height: 100%; overflow-y: auto; background: var(--surface); padding: 20px 20px 40px; }
+.cart-head { display: flex; justify-content: space-between; align-items: center; }
+.cart-head h2 { margin: 0; font-size: 22px; }
+.close-x { width: 44px; height: 44px; border: 0; background: none; font-size: 28px; line-height: 1; color: var(--ink); }
+.cart-list { list-style: none; margin: 14px 0 0; padding: 0; }
+.cart-list li { display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); align-items: start; }
+.cart-list img { width: 64px; height: 64px; object-fit: contain; border: 1px solid #EEEEEE; background: #fff; }
+.cart-list .t { font-weight: 600; font-size: 14px; } .cart-list .s { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.cart-list .p { font-size: 14px; font-weight: 600; text-align: right; }
+.cart-list .rm { border: 0; background: none; color: var(--muted); font-size: 13px; text-decoration: underline; padding: 6px 0 0; min-height: 32px; }
+.cart-empty { color: var(--muted); padding: 20px 0; }
+.cart-total { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 0; font-size: 15px; }
+.cart-total b { font-size: 22px; }
+.cta-inline { width: 100%; min-height: 52px; margin-top: 12px; border: 0; background: var(--brand); color: #fff; font-weight: 600; font-size: 15px; }
+.cta-inline:disabled { background: var(--line); color: var(--soft); }
+.toast { pointer-events: none; position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); padding: 11px 16px; background: var(--ink); color: #fff; font-size: 14px; z-index: 50; visibility: hidden; max-width: 90%; text-align: center; }
 .cta { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 30;
        width: min(460px, 100% - 32px); min-height: 54px; border: 0; background: var(--brand); color: #fff;
        font-weight: 600; font-size: 15px; letter-spacing: .02em; display: none; }
@@ -210,7 +252,11 @@ img { display: block; max-width: 100%; }
     <div class="wrap">
         <div class="bar">
             <a class="logo" href="./"><img src="brand/favicon.svg" alt=""><span>НАСЛЕДИЕ</span></a>
-            <nav aria-label="Разделы"><a href="#catalog">каталог</a><a href="#how">как заказать</a><a class="tg" href="https://t.me/Heritage_content_bot">telegram</a></nav>
+            <div class="bar-right">
+                <nav aria-label="Разделы"><a href="#catalog">каталог</a><a href="#how">как заказать</a><a class="tg" href="https://t.me/Heritage_content_bot">telegram</a></nav>
+                <button class="icon-btn" id="fav-btn" type="button" aria-label="Избранное"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20s-7-4.4-9.3-9A5.2 5.2 0 0 1 12 6a5.2 5.2 0 0 1 9.3 5c-2.3 4.6-9.3 9-9.3 9z"/></svg><span class="count num" id="fav-count" hidden></span></button>
+                <button class="icon-btn" id="cart-btn" type="button" aria-label="Корзина"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 4h2l2.4 11.2a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.5-1.1L21 8H6.2"/><circle cx="9.5" cy="20" r="1.3"/><circle cx="17.5" cy="20" r="1.3"/></svg><span class="count num" id="cart-count" hidden></span></button>
+            </div>
         </div>
         <div class="intro">
             <h1 id="title">Мебель для вашего комфорта</h1>
@@ -229,6 +275,18 @@ img { display: block; max-width: 100%; }
         <nav class="filters" aria-label="Категории">
             <div class="chip-row" id="cats"><div class="pill-bg"></div></div>
             <div class="chip-row sub" id="subs" hidden><div class="pill-bg"></div></div>
+            <div class="tools">
+                <input type="search" id="search" placeholder="Поиск по названию" aria-label="Поиск по названию" autocomplete="off">
+                <select id="sort" aria-label="Сортировка">
+                    <option value="pop">Сначала популярные</option><option value="asc">Сначала дешевле</option>
+                    <option value="desc">Сначала дороже</option><option value="new">Сначала новинки</option>
+                </select>
+                <select id="price" aria-label="Цена">
+                    <option value="">Любая цена</option><option value="0-20000">до 20 000 ₽</option><option value="20000-50000">20 000 – 50 000 ₽</option>
+                    <option value="50000-100000">50 000 – 100 000 ₽</option><option value="100000-">от 100 000 ₽</option>
+                </select>
+                <label class="only-fav"><input type="checkbox" id="only-fav"> Избранное</label>
+            </div>
         </nav>
         <div class="grid" id="grid" aria-live="polite"></div>
     </div>
@@ -249,11 +307,15 @@ img { display: block; max-width: 100%; }
             <div class="where" id="d-where"></div>
             <div class="total"><span class="sum num" id="d-sum"></span><span class="hint" id="d-sum-hint"></span></div>
             <p class="picked" id="d-picked"></p>
+            <div class="buy-row">
+                <button type="button" class="btn-line" id="to-cart">В корзину</button>
+                <button type="button" class="heart" id="d-fav" aria-pressed="false" aria-label="В избранное"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20s-7-4.4-9.3-9A5.2 5.2 0 0 1 12 6a5.2 5.2 0 0 1 9.3 5c-2.3 4.6-9.3 9-9.3 9z"/></svg></button>
+            </div>
 
             <div id="cfg">
                 <div class="block" id="b-variants"><h3 id="v-title"></h3><p class="sub" id="v-sub"></p><div class="choices" id="variants"></div></div>
-                <div class="block" id="b-fabric"><h3>Ткань</h3>
-                    <p class="sub">Категория — это ценовая группа ткани в прайсе фабрики. Цвет и образцы консультант пришлёт после заявки.</p>
+                <div class="block" id="b-fabric"><h3 id="fab-title">Ткань</h3>
+                    <p class="sub" id="fab-sub">Категория — это ценовая группа ткани в прайсе фабрики. Цвет и образцы консультант пришлёт после заявки.</p>
                     <div class="fabrics" id="fabrics"></div>
                     <details class="explain" id="fab-explain">
                         <summary>Чем отличаются категории и почему разная цена</summary>
@@ -295,8 +357,25 @@ img { display: block; max-width: 100%; }
     </div>
 </section>
 
+<aside class="cart" id="cart" role="dialog" aria-modal="true" aria-labelledby="cart-title" data-lenis-prevent hidden>
+    <div class="cart-in">
+        <div class="cart-head"><h2 id="cart-title">Корзина</h2><button type="button" class="close-x" id="cart-close" aria-label="Закрыть корзину">×</button></div>
+        <ul class="cart-list" id="cart-list"></ul>
+        <div class="cart-total"><span>Итого по прайсу</span><b class="num" id="cart-sum"></b></div>
+        <form class="lead-form" id="cart-form" novalidate>
+            <label for="c-name">Как к вам обращаться</label><input id="c-name" autocomplete="name" maxlength="100">
+            <label for="c-phone">Телефон</label><input id="c-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 900 123-45-67">
+            <button type="button" class="share" id="c-share" hidden>Подставить номер из Telegram</button>
+            <label for="c-comment">Пожелания <span>необязательно</span></label><textarea id="c-comment" rows="2" maxlength="600"></textarea>
+            <p class="error" id="c-error" role="alert"></p>
+            <button type="submit" class="cta-inline" id="c-send">Отправить заявку на всё</button>
+        </form>
+        <div class="done" id="c-done" hidden><h3>Заявка принята</h3><p>Консультант свяжется с вами в ближайшее рабочее время.</p></div>
+    </div>
+</aside>
 <button class="cta" id="cta">Оставить заявку</button>
 
+<div class="toast" id="toast" role="status"></div>
 <script src="vendor/gsap/gsap.min.js"></script>
 <script src="vendor/gsap/Flip.min.js"></script>
 <script src="vendor/lenis/lenis.min.js"></script>
@@ -401,16 +480,36 @@ img { display: block; max-width: 100%; }
         var ph = p.photos[0]
             ? '<div class="ph' + (p.full[0] ? " full" : "") + '"><img src="' + esc(p.photos[0]) + '" alt="' + esc(p.name) + '" loading="lazy" data-flip-id="ph-' + p.id + '"></div>'
             : '<div class="ph none"><img src="brand/favicon.svg" alt=""></div>';
-        var badges = p.sale ? '<span class="badge sale">Распродажа</span>' : "";  // «склад» есть почти у всех — метка не выделяла бы ничего
-        return '<button class="card" type="button" data-id="' + p.id + '">' + (badges ? '<span class="badges">' + badges + "</span>" : "") + ph + '<div class="meta"><div class="name">' + esc(p.name) +
-            '</div><div class="price num">' + (p.price ? '<span class="from">от</span> ' + rub(p.price) : '<span class="from">цена по запросу</span>') + "</div></div></button>";
+        var badges = (p.new ? '<span class="badge new">Новинка</span>' : "") + (p.sale ? '<span class="badge sale">Распродажа</span>' : "");
+        return '<div class="card" role="button" tabindex="0" data-id="' + p.id + '">' + (badges ? '<span class="badges">' + badges + "</span>" : "") +
+            '<button type="button" class="heart-mini" data-fav="' + p.id + '" aria-label="В избранное" aria-pressed="' + isFav(p.id) + '"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20s-7-4.4-9.3-9A5.2 5.2 0 0 1 12 6a5.2 5.2 0 0 1 9.3 5c-2.3 4.6-9.3 9-9.3 9z"/></svg></button>' + ph +
+            '<div class="meta"><div class="name">' + esc(p.name) + '</div>' + (p.spec ? '<div class="spec">' + esc(p.spec) + "</div>" : "") +
+            '<div class="price num">' + (p.price ? '<span class="from">от</span> ' + rub(p.price) : '<span class="from">цена по запросу</span>') + "</div></div></div>";
     }
     function renderGrid(animate) {
-        var list = products.filter(function (p) { return (!state.cat || p.category === state.cat) && (!state.sub || p.sub === state.sub); });
+        var q = $("search").value.trim().toLowerCase(), range = $("price").value.split("-"), onlyFav = $("only-fav").checked;
+        var lo = +range[0] || 0, hi = +range[1] || Infinity, sort = $("sort").value;
+        var list = products.filter(function (p) {
+            return (!state.cat || p.category === state.cat) && (!state.sub || p.sub === state.sub)
+                && (!q || p.name.toLowerCase().indexOf(q) >= 0)
+                && (!$("price").value || (p.price && p.price >= lo && p.price < hi))
+                && (!onlyFav || isFav(p.id));
+        });
+        if (sort === "asc" || sort === "desc") list = list.slice().sort(function (a, b) {
+            return ((a.price || 1e12) - (b.price || 1e12)) * (sort === "asc" ? 1 : -1); });
+        if (sort === "new") list = list.slice().sort(function (a, b) { return (b.new ? 1 : 0) - (a.new ? 1 : 0); });
         var grid = $("grid");
         var draw = function () {
-            grid.innerHTML = list.length ? list.map(cardHTML).join("") : '<p class="empty">В этой категории пока нет моделей.</p>';
-            grid.querySelectorAll(".card").forEach(function (c) { c.onclick = function () { open(+c.dataset.id, c); }; });
+            grid.innerHTML = list.length ? list.map(cardHTML).join("")
+                : '<p class="empty">' + (onlyFav ? "В избранном пока пусто: нажмите сердечко на карточке." : "Ничего не нашлось — измените поиск или фильтр.") + "</p>";
+            grid.querySelectorAll(".card").forEach(function (c) {
+                c.onclick = function (e) {
+                    var h = e.target.closest(".heart-mini");
+                    if (h) { e.stopPropagation(); toggleFav(+h.dataset.fav); h.setAttribute("aria-pressed", isFav(+h.dataset.fav)); return; }
+                    open(+c.dataset.id, c);
+                };
+                c.onkeydown = function (e) { if (e.key === "Enter") open(+c.dataset.id, c); };
+            });
         };
         if (!animate || reduce) return draw();
         gsap.to(grid, { opacity: 0, duration: .15, ease: "power1.in", onComplete: function () {
@@ -466,6 +565,7 @@ img { display: block; max-width: 100%; }
         if (flipState) Flip.from(flipState, { targets: sheet.querySelector(".slide img"), duration: .55, ease: "expo.inOut", absolute: true });
         else gsap.from(".gallery", { opacity: 0, duration: .3 * D });
         gsap.from(".info > *", { y: 14, opacity: 0, duration: .5 * D, ease: "expo.out", stagger: .03 * D, delay: .1 * D });
+        $("d-fav").setAttribute("aria-pressed", isFav(p.id));
         showCTA(true);
         if (tg && tg.BackButton) tg.BackButton.show();
     }
@@ -504,6 +604,12 @@ img { display: block; max-width: 100%; }
         var vs = p.variants;
         $("b-variants").hidden = !vs.length; $("b-fabric").hidden = !vs.length;
         renderOptions(p);
+        var keys = allFabrics().join(" ").toLowerCase();
+        var lart = /зк|склад/.test(keys);  // категории ЗК/Склад — у мягкой мебели; у столов и стульев свои материалы
+        $("fab-title").textContent = lart ? "Ткань" : /пластик|лдсп|стекл|керамик|матов/.test(keys) ? "Материал столешницы" : /ткань/.test(keys) ? "Ткань обивки" : "Материал";
+        $("fab-sub").textContent = lart ? "Категория — это ценовая группа ткани в прайсе фабрики. Цвет и образцы консультант пришлёт после заявки."
+            : "Цена зависит от материала. Цвет и образцы консультант пришлёт после заявки.";
+        $("fab-explain").hidden = !lart;
         if (!vs.length) { updateTotal(); return; }
         $("v-title").textContent = p.modular ? "Соберите комплект" : vs.length > 1 ? "Размер и исполнение" : "Исполнение";
         $("v-sub").textContent = "Начните с готового комплекта или добавьте модули по одному.";
@@ -618,6 +724,7 @@ img { display: block; max-width: 100%; }
         var sel = selected().map(function (v) { return v.title + (p.modular ? " × " + cfg.items[v.id] : ""); });
         $("d-picked").innerHTML = sel.length ? "<b>Выбрано:</b> " + esc(sel.join("; ")) + (cfg.fabric ? ", " + esc(fabricName(cfg.fabric).toLowerCase()) : "") : "";
         if (step === "cfg") setCTA("Оставить заявку", isReady());
+        $("to-cart").disabled = !isReady();
     }
     function isReady() { return !current.variants.length || (selected().length > 0 && !!cfg.fabric); }
 
@@ -678,13 +785,20 @@ img { display: block; max-width: 100%; }
     var onServer = !/github\.io$/.test(location.hostname);
     // Открыто из меню/инлайн-кнопки (sendData недоступен): передаём выбор ссылкой t.me/бот?start=…
     // Формат (≤64 символа A-Za-z0-9_-): L<товар>F<ткань: s|номер ЗК|0>P<телефон>[I<вариант>x<кол-во>]…
-    function viaStartLink(payload) {
-        var f = payload.fabric === "Склад" ? "s" : ((payload.fabric.match(/ЗК\s*(\d+)/) || [0, "0"])[1]);
-        var code = "L" + payload.product_id + "F" + f + "P" + payload.phone.replace(/\D/g, "");
-        Object.keys(payload.items).forEach(function (id) {
-            var part = "I" + id + "x" + payload.items[id];
+    function startCode(phone, positions) {
+        // P<телефон>L<товар>F<№ материала>I<вариант>x<кол-во>… — бот разбирает так же (SHOWCASE_CODE)
+        var code = "P" + phone.replace(/\D/g, "");
+        positions.forEach(function (it) {
+            var p = products.find(function (x) { return x.id === it.product_id; });
+            var mats = p ? materialsOf(p) : [], i = mats.indexOf(it.fabric);
+            var part = "L" + it.product_id + "F" + (i >= 0 ? i : "z");
+            Object.keys(it.items).forEach(function (id) { part += "I" + id + "x" + it.items[id]; });
             if ((code + part).length <= 64) code += part;
         });
+        return code;
+    }
+    function viaStartLink(payload) {
+        var code = startCode(payload.phone, [payload]);
         // показать результат, затем перейти в чат: Telegram отправит боту /start с кодом заявки
         step = "done"; haptic("ok");
         $("lead").hidden = true; $("cfg").hidden = true; $("done").hidden = false;
@@ -730,6 +844,113 @@ img { display: block; max-width: 100%; }
                 : "Нет связи. Проверьте интернет и нажмите ещё раз");
         });
     }
+
+    function materialsOf(p) {
+        var all = [];
+        p.variants.forEach(function (v) { Object.keys(v.prices).forEach(function (k) { if (all.indexOf(k) < 0) all.push(k); }); });
+        return all.sort();
+    }
+    function toast(text) {
+        var t = $("toast"); t.textContent = text;
+        gsap.killTweensOf(t);
+        gsap.timeline().fromTo(t, { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: .25 }).to(t, { autoAlpha: 0, delay: 2.2, duration: .3 });
+    }
+    function load(key) { try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch (e) { return []; } }
+    function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
+
+    // ── избранное ──
+    var favs = load("heritage.favs");
+    function isFav(id) { return favs.indexOf(id) >= 0; }
+    function toggleFav(id) {
+        favs = isFav(id) ? favs.filter(function (x) { return x !== id; }) : favs.concat([id]);
+        save("heritage.favs", favs); haptic(); updateCounts();
+        toast(isFav(id) ? "Добавлено в избранное" : "Убрано из избранного");
+        if ($("only-fav").checked) renderGrid(false);
+    }
+    $("d-fav").onclick = function () { if (!current) return; toggleFav(current.id); $("d-fav").setAttribute("aria-pressed", isFav(current.id)); };
+    $("fav-btn").onclick = function () {
+        $("only-fav").checked = true; renderGrid(true);
+        $("catalog").scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+    };
+
+    // ── корзина ──
+    var cart = load("heritage.cart");
+    function cartTotal() { return cart.reduce(function (s, it) { return s + (it.price || 0); }, 0); }
+    function updateCounts() {
+        var f = $("fav-count"), c = $("cart-count");
+        f.textContent = favs.length; f.hidden = !favs.length;
+        c.textContent = cart.length; c.hidden = !cart.length;
+    }
+    $("to-cart").onclick = function () {
+        if (!current || !isReady()) return;
+        var items = {}; Object.keys(cfg.items).forEach(function (k) { items[k] = cfg.items[k]; });
+        cart.push({ product_id: current.id, name: current.name, photo: current.photos[0] || "", fabric: cfg.fabric, items: items,
+                    options: cfg.options.slice(), picked: $("d-picked").textContent.replace(/^Выбрано:\s*/, ""),
+                    price: current.variants.length ? sumFor(cfg.fabric) : 0 });
+        cart = cart.slice(-20); save("heritage.cart", cart); updateCounts(); haptic("ok");
+        toast("Добавлено в корзину: " + current.name);
+    };
+    function renderCart() {
+        $("cart-list").innerHTML = cart.length ? cart.map(function (it, i) {
+            return '<li>' + (it.photo ? '<img src="' + esc(it.photo) + '" alt="">' : "<span></span>") +
+                '<div><div class="t">' + esc(it.name) + '</div><div class="s">' + esc(it.picked) + '</div><button type="button" class="rm" data-i="' + i + '">Убрать</button></div>' +
+                '<div class="p num">' + (it.price ? rub(it.price) : "по запросу") + "</div></li>";
+        }).join("") : '<li class="cart-empty">Корзина пуста. Соберите модель и нажмите «В корзину».</li>';
+        $("cart-list").querySelectorAll(".rm").forEach(function (b) { b.onclick = function () {
+            cart.splice(+b.dataset.i, 1); save("heritage.cart", cart); updateCounts(); renderCart(); }; });
+        $("cart-sum").textContent = rub(cartTotal());
+        $("cart-form").hidden = !cart.length; $("c-done").hidden = true;
+        $("c-send").disabled = !cart.length;
+    }
+    function openCart() {
+        renderCart(); $("cart").hidden = false; haptic();
+        var user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+        if (user && !$("c-name").value) $("c-name").value = [user.first_name, user.last_name].filter(Boolean).join(" ");
+        $("c-share").hidden = !(inTelegram && tg.requestContact && tg.isVersionAtLeast && tg.isVersionAtLeast("6.9"));
+        gsap.fromTo(".cart-in", { x: 60, opacity: 0 }, { x: 0, opacity: 1, duration: .35 * D, ease: "expo.out" });
+        if (inTelegram && tg.MainButton) tg.MainButton.hide();
+    }
+    function closeCart() { $("cart").hidden = true; if (current) showCTA(true); }
+    $("cart-btn").onclick = openCart;
+    $("cart-close").onclick = closeCart;
+    $("cart").onclick = function (e) { if (e.target === $("cart")) closeCart(); };
+    $("c-share").onclick = function () {
+        tg.requestContact(function (ok, res) {
+            var ph = ok && res && res.responseUnsafe && res.responseUnsafe.contact && res.responseUnsafe.contact.phone_number;
+            if (ph) $("c-phone").value = (ph.charAt(0) === "+" ? "" : "+") + ph;
+        });
+    };
+    $("cart-form").onsubmit = function (e) {
+        e.preventDefault();
+        var name = $("c-name").value.trim(), phone = $("c-phone").value.trim(), digits = phone.replace(/\D/g, "");
+        var err = function (m) { $("c-error").textContent = m; haptic("err"); };
+        if (name.length < 2) return err("Напишите, как к вам обращаться");
+        if (digits.length < 10 || digits.length > 15) return err("Проверьте номер, например +7 900 123-45-67");
+        $("c-error").textContent = "";
+        var positions = cart.map(function (it) { return { product_id: it.product_id, fabric: it.fabric, items: it.items, options: it.options }; });
+        var payload = { name: name, phone: phone, comment: $("c-comment").value.trim().slice(0, 600), cart: positions };
+        var done = function () {
+            cart = []; save("heritage.cart", cart); updateCounts();
+            $("cart-form").hidden = true; $("c-done").hidden = false; $("cart-list").innerHTML = ""; haptic("ok");
+        };
+        if (inTelegram && !(tg && tg.initData) && tg.sendData) { tg.sendData(JSON.stringify(payload)); return; }
+        if (inTelegram && !onServer) {  // меню Telegram + витрина на GitHub: передаём кодом в /start
+            var code = startCode(phone, positions);
+            done(); setTimeout(function () { tg.openTelegramLink("https://t.me/Heritage_content_bot?start=" + code); }, 700);
+            return;
+        }
+        if (!(tg && tg.initData)) return err("Заявку можно отправить из Telegram: откройте каталог в боте @Heritage_content_bot");
+        $("c-send").disabled = true;
+        fetch("api/lead", { method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(Object.assign({ init_data: tg.initData }, payload)) })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (res) { $("c-send").disabled = false; if (!res.ok) return err(typeof res.j.detail === "string" ? res.j.detail : "Проверьте поля"); done(); })
+        .catch(function () { $("c-send").disabled = false; err("Нет связи. Проверьте интернет и нажмите ещё раз"); });
+    };
+    ["search", "sort", "price", "only-fav"].forEach(function (id) {
+        $(id).addEventListener(id === "search" ? "input" : "change", function () { renderGrid(false); });
+    });
+    updateCounts();
 
     addEventListener("resize", function () { movePill($("cats"), false); if (!$("subs").hidden) movePill($("subs"), false); });
 })();
