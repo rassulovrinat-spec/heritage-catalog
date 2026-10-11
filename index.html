@@ -167,6 +167,15 @@ img { display: block; max-width: 100%; }
 .fabric:disabled { opacity: .45; cursor: default; }
 .fabric .t { display: block; font-weight: 500; }
 .fabric .p { display: block; font-size: 13px; color: var(--muted); }
+.explain { margin-top: 12px; border: 1px solid var(--line); background: var(--surface); }
+.explain summary { cursor: pointer; padding: 12px 14px; font-weight: 500; list-style: none; display: flex; justify-content: space-between; min-height: 44px; align-items: center; }
+.explain summary::-webkit-details-marker { display: none; }
+.explain summary::after { content: "+"; font-size: 18px; color: var(--muted); }
+.explain[open] summary::after { content: "−"; }
+.explain-body { padding: 0 14px 12px; font-size: 14px; color: var(--muted); }
+.explain-body p { margin: 0 0 8px; color: var(--ink); }
+.explain-body ul { margin: 0; padding-left: 18px; } .explain-body li { margin: 6px 0; }
+.fabric .d { display: block; font-size: 12px; color: var(--soft); }
 .opt { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; cursor: pointer; }
 .opt input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--ink); flex: 0 0 auto; }
 
@@ -244,8 +253,20 @@ img { display: block; max-width: 100%; }
             <div id="cfg">
                 <div class="block" id="b-variants"><h3 id="v-title"></h3><p class="sub" id="v-sub"></p><div class="choices" id="variants"></div></div>
                 <div class="block" id="b-fabric"><h3>Ткань</h3>
-                    <p class="sub">Чем выше категория, тем дороже ткань. Цвет и образцы консультант пришлёт после заявки.</p>
-                    <div class="fabrics" id="fabrics"></div></div>
+                    <p class="sub">Категория — это ценовая группа ткани в прайсе фабрики. Цвет и образцы консультант пришлёт после заявки.</p>
+                    <div class="fabrics" id="fabrics"></div>
+                    <details class="explain" id="fab-explain">
+                        <summary>Чем отличаются категории и почему разная цена</summary>
+                        <div class="explain-body">
+                            <p id="fab-range"></p>
+                            <ul>
+                                <li><b>Со склада</b> — модель в складской ткани фабрики: она указана у варианта (например, «ткань Монако 02»). Цвет — как у этой ткани, цена обычно ниже.</li>
+                                <li><b>Категории 1–11</b> — ткани на выбор из коллекций фабрики. Номер категории отражает цену самой ткани: чем выше, тем дороже ткань, а значит и диван.</li>
+                                <li>Как правило, в мебельных прайсах более высокие категории — это более плотные и износостойкие ткани, мягче на ощупь, со сложной фактурой или особыми свойствами (лёгкая чистка, защита от когтей). Конкретные ткани каждой категории покажет консультант.</li>
+                                <li>Форма, размеры, механизм и наполнение от категории ткани <b>не меняются</b> — меняется только обивка.</li>
+                            </ul>
+                        </div>
+                    </details></div>
                 <div class="block" id="b-options" hidden><h3>Бесплатно по желанию</h3><p class="sub">Фабрика делает это без доплаты.</p><div id="options"></div></div>
             </div>
 
@@ -551,11 +572,19 @@ img { display: block; max-width: 100%; }
     function cheapestFabric(avail) { return avail.reduce(function (a, b) { return sumFor(b) < sumFor(a) ? b : a; }); }
     function renderFabrics() {
         var avail = availableFabrics();
+        var cheapest = avail.length ? Math.min.apply(null, avail.map(sumFor)) : 0;
+        var dearest = avail.length ? Math.max.apply(null, avail.map(sumFor)) : 0;
+        $("fab-range").textContent = avail.length > 1
+            ? "Для выбранного варианта ткань меняет цену от " + rub(cheapest) + " до " + rub(dearest) +
+              " — разница " + rub(dearest - cheapest) + " (+" + Math.round((dearest - cheapest) / cheapest * 100) + "%)."
+            : "";
         $("fabrics").innerHTML = allFabrics().map(function (k) {
             var on = avail.indexOf(k) >= 0;
+            var diff = on ? sumFor(k) - cheapest : 0;
             return '<button type="button" class="fabric" data-f="' + esc(k) + '" aria-pressed="' + (k === cfg.fabric) + '"' + (on ? "" : " disabled") +
                 '><span class="t">' + esc(fabricName(k)) + '</span><span class="p num">' +
-                (on ? rub(sumFor(k)) : selected().length ? "нет для выбранного" : "сначала выберите размер") + "</span></button>";
+                (on ? rub(sumFor(k)) : selected().length ? "нет для выбранного" : "сначала выберите размер") + "</span>" +
+                (on && diff > 0 ? '<span class="d num">+' + rub(diff) + "</span>" : on ? '<span class="d">самая доступная</span>' : "") + "</button>";
         }).join("");
         $("fabrics").querySelectorAll(".fabric").forEach(function (b) { b.onclick = function () {
             cfg.fabric = b.dataset.f; haptic(); renderFabrics(); updateTotal();
