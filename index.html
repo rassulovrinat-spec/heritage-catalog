@@ -805,7 +805,13 @@ img { display: block; max-width: 100%; }
         $("done").querySelector("p").textContent = "Открываем чат с консультантом — заявка уйдёт автоматически.";
         $("done").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
         setCTA("Вернуться в каталог");
-        setTimeout(function () { tg.openTelegramLink("https://t.me/Heritage_content_bot?start=" + code); }, 900);
+        setTimeout(function () { openChat(code); }, 900);
+    }
+    // В Telegram — чат с ботом Telegram; вне его (мини-приложение MAX, браузер) — бот MAX: он получит код в bot_started
+    var MAX_BOT = "https://max.ru/id165717060130_bot";
+    function openChat(code) {
+        if (inTelegram) tg.openTelegramLink("https://t.me/Heritage_content_bot?start=" + code);
+        else location.href = MAX_BOT + "?start=" + code;
     }
     function submit() {
         if (sending) return;
@@ -816,6 +822,7 @@ img { display: block; max-width: 100%; }
         $("f-error").textContent = "";
         var payload = { product_id: current.id, name: name, phone: phone, comment: $("f-comment").value.trim().slice(0, 600),
                         fabric: cfg.fabric, items: cfg.items, options: cfg.options };
+        if (!inTelegram) return viaStartLink(payload);  // MAX или браузер: заявку примет бот MAX
         if (!(tg && tg.initData)) {
             // открыто с кнопки клавиатуры: подписи нет, Telegram сам передаст заявку боту
             if (inTelegram && tg.sendData) { haptic("ok"); tg.sendData(JSON.stringify(payload)); return; }
@@ -934,9 +941,9 @@ img { display: block; max-width: 100%; }
             $("cart-form").hidden = true; $("c-done").hidden = false; $("cart-list").innerHTML = ""; haptic("ok");
         };
         if (inTelegram && !(tg && tg.initData) && tg.sendData) { tg.sendData(JSON.stringify(payload)); return; }
-        if (inTelegram && !onServer) {  // меню Telegram + витрина на GitHub: передаём кодом в /start
+        if (!inTelegram || !onServer) {  // витрина на GitHub или MAX: передаём кодом в start бота
             var code = startCode(phone, positions);
-            done(); setTimeout(function () { tg.openTelegramLink("https://t.me/Heritage_content_bot?start=" + code); }, 700);
+            done(); setTimeout(function () { openChat(code); }, 700);
             return;
         }
         if (!(tg && tg.initData)) return err("Заявку можно отправить из Telegram: откройте каталог в боте @Heritage_content_bot");
