@@ -7,22 +7,12 @@
 <title>НАСЛЕДИЕ — мебель для вашего комфорта</title>
 <meta name="description" content="Каталог мебели салона «Наследие»: диваны, кресла, кровати. Выберите размер и ткань, цена считается сразу.">
 <link rel="icon" href="brand/favicon.svg" type="image/svg+xml">
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://st.max.ru/js/max-web-app.js"></script>
 <script>
-// диагностика во встроенном окне (MAX): сообщаем родителю, загрузилась ли витрина и какие были ошибки
-(function () {
-    if (window.parent === window) return;
-    var errs = [];
-    addEventListener("error", function (e) { errs.push(String(e.message).slice(0, 150)); });
-    addEventListener("load", function () {
-        setTimeout(function () {
-            parent.postMessage({ heritageDebug: { cards: document.querySelectorAll("[data-id]").length,
-                h: document.body.scrollHeight, errs: errs, ua: navigator.userAgent.slice(0, 80) } }, "*");
-        }, 2500);
-    });
-})();
+// telegram.org в РФ часто недоступен без VPN: грузим его скрипт только внутри Telegram, иначе MAX и сайт висят на белом экране
+if (/tgWebApp/.test(location.hash) || sessionStorage.getItem("__telegram__initParams"))
+    document.write('<script src="https://telegram.org/js/telegram-web-app.js"><\/script>');
 </script>
+<script src="https://st.max.ru/js/max-web-app.js"></script>
 <link href="vendor/fonts/fonts.css" rel="stylesheet">
 <link href="vendor/lenis/lenis.css" rel="stylesheet">
 <style>
