@@ -244,6 +244,7 @@ img { display: block; max-width: 100%; }
 .cart-empty { color: var(--muted); padding: 20px 0; }
 .cart-total { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 0; font-size: 15px; }
 .cart-total b { font-size: 22px; }
+.promo-note { margin: 4px 0 0; font-size: 13px; color: var(--muted); min-height: 1em; }
 .cta-inline { width: 100%; min-height: 52px; margin-top: 12px; border: 0; background: var(--brand); color: #fff; font-weight: 600; font-size: 15px; }
 .cta-inline:disabled { background: var(--line); color: var(--soft); }
 .toast { pointer-events: none; position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); padding: 11px 16px; background: var(--ink); color: #fff; font-size: 14px; z-index: 50; visibility: hidden; max-width: 90%; text-align: center; }
@@ -349,6 +350,7 @@ img { display: block; max-width: 100%; }
                 <button type="button" class="share" id="share" hidden>Подставить номер из Telegram</button>
                 <label for="f-comment">Пожелания <span>необязательно</span></label>
                 <textarea id="f-comment" rows="3" maxlength="600" placeholder="Цвет, когда удобно позвонить, адрес доставки"></textarea>
+                <div class="promo-box" hidden><label for="f-promo">Промокод <span>необязательно</span></label><input id="f-promo" autocapitalize="characters" autocomplete="off" maxlength="30"><p class="promo-note" id="f-promo-note" aria-live="polite"></p></div>
                 <p class="error" id="f-error" role="alert"></p>
             </form>
             <div class="done" id="done" hidden>
@@ -374,6 +376,7 @@ img { display: block; max-width: 100%; }
             <label for="c-phone">Телефон</label><input id="c-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 900 123-45-67">
             <button type="button" class="share" id="c-share" hidden>Подставить номер из Telegram</button>
             <label for="c-comment">Пожелания <span>необязательно</span></label><textarea id="c-comment" rows="2" maxlength="600"></textarea>
+            <div class="promo-box" hidden><label for="c-promo">Промокод <span>необязательно</span></label><input id="c-promo" autocapitalize="characters" autocomplete="off" maxlength="30"><p class="promo-note" id="c-promo-note" aria-live="polite"></p></div>
             <p class="error" id="c-error" role="alert"></p>
             <button type="submit" class="cta-inline" id="c-send">Отправить заявку на всё</button>
         </form>
@@ -795,22 +798,22 @@ img { display: block; max-width: 100%; }
     var onServer = !/github\.io$/.test(location.hostname);
     // Открыто из меню/инлайн-кнопки (sendData недоступен): передаём выбор ссылкой t.me/бот?start=…
     // Формат (≤64 символа A-Za-z0-9_-): L<товар>F<ткань: s|номер ЗК|0>P<телефон>[I<вариант>x<кол-во>]…
-    function startCode(phone, positions) {
+    function startCode(phone, positions, promo) {
         // P<телефон>L<товар>F<№ материала>I<вариант>x<кол-во>… — бот разбирает так же (SHOWCASE_CODE)
         var code = "P" + phone.replace(/\D/g, "");
-        var dropped = 0;
+        var dropped = 0, tail = promo && promo.length >= 2 ? "_" + promo : "";  // промокод — последним, после «_»
         positions.forEach(function (it) {
             var p = products.find(function (x) { return x.id === it.product_id; });
             var mats = p ? materialsOf(p) : [], i = mats.indexOf(it.fabric);
             var part = "L" + it.product_id + "F" + (i >= 0 ? i : "z");
             Object.keys(it.items).forEach(function (id) { part += "I" + id + "x" + it.items[id]; });
-            if ((code + part).length <= 61) code += part; else dropped++;
+            if ((code + part).length <= 61 - tail.length) code += part; else dropped++;  // 3 знака — под X<n>
         });
         // не влезшие в лимит ссылки (64) позиции не выбрасываем молча: X<сколько> — менеджер уточнит при звонке
-        return dropped ? code + "X" + dropped : code;
+        return code + (dropped ? "X" + dropped : "") + tail;
     }
     function viaStartLink(payload) {
-        var code = startCode(payload.phone, [payload]);
+        var code = startCode(payload.phone, [payload], payload.promo);
         // показать результат, затем перейти в чат: Telegram отправит боту /start с кодом заявки
         step = "done"; haptic("ok");
         $("lead").hidden = true; $("cfg").hidden = true; $("done").hidden = false;
@@ -834,7 +837,7 @@ img { display: block; max-width: 100%; }
         if (digits.length < 10 || digits.length > 15) return fail("Проверьте номер, например +7 900 123-45-67", "f-phone");
         $("f-error").textContent = "";
         var payload = { product_id: current.id, name: name, phone: phone, comment: $("f-comment").value.trim().slice(0, 600),
-                        fabric: cfg.fabric, items: cfg.items, options: cfg.options };
+                        fabric: cfg.fabric, items: cfg.items, options: cfg.options, promo: promoNorm($("f-promo").value) };
         if (!inTelegram) return viaStartLink(payload);  // MAX или браузер: заявку примет бот MAX
         if (!(tg && tg.initData)) {
             // открыто с кнопки клавиатуры: подписи нет, Telegram сам передаст заявку боту
@@ -878,6 +881,41 @@ img { display: block; max-width: 100%; }
     function load(key) { try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch (e) { return []; } }
     function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
 
+    // Промокоды: витрина только показывает скидку, итог пересчитывает бот по прайсу (app/promo.py)
+    var promos = [];
+    var LOOK = { "А": "A", "В": "B", "Е": "E", "К": "K", "М": "M", "Н": "H", "О": "O", "Р": "P", "С": "C", "Т": "T", "У": "Y", "Х": "X" };
+    function promoNorm(s) {
+        return String(s || "").toUpperCase().replace(/[АВЕКМНОРСТУХ]/g, function (c) { return LOOK[c]; }).replace(/[^A-Z0-9]/g, "").slice(0, 12);
+    }
+    var urlPromo = promoNorm(new URLSearchParams(location.search).get("promo"));
+    if (urlPromo) try { localStorage.setItem("heritage.promo", urlPromo); } catch (e) {}
+    function promoOff(code, total) {  // null — нет кода; <0 — не хватает до минимальной суммы
+        var p = promos.find(function (x) { return x.code === code; });
+        if (!p) return null;
+        if (!total) return 0;
+        if (p.min_total && total < p.min_total) return -p.min_total;
+        return Math.floor(Math.min(p.percent ? total * p.percent / 100 : (p.amount || 0), total));
+    }
+    function promoNote(id) {
+        var code = promoNorm($(id).value), off;
+        var total = id === "c-promo" ? cartTotal() : (current && current.variants.length && isReady() ? sumFor(cfg.fabric) : 0);
+        off = code ? promoOff(code, total) : null;
+        $(id + "-note").textContent = !code ? "" : off === null ? "Такого промокода нет"
+            : off < 0 ? "Промокод действует от " + rub(-off) : off ? "Скидка " + rub(off) + ", к оплате " + rub(total - off)
+            : "Скидку посчитает консультант";
+    }
+    fetch("api/promo").then(function (r) { return r.ok ? r.json() : []; }).then(function (list) {
+        promos = list || [];
+        if (!promos.length) return;  // активных кодов нет — поле не показываем
+        var saved = ""; try { saved = localStorage.getItem("heritage.promo") || ""; } catch (e) {}
+        document.querySelectorAll(".promo-box").forEach(function (b) { b.hidden = false; });
+        ["f-promo", "c-promo"].forEach(function (id) {
+            if (saved && !$(id).value) $(id).value = saved;
+            $(id).oninput = function () { promoNote(id); };
+            promoNote(id);
+        });
+    }).catch(function () {});
+
     // ── избранное ──
     var favs = load("heritage.favs");
     function isFav(id) { return favs.indexOf(id) >= 0; }
@@ -919,6 +957,7 @@ img { display: block; max-width: 100%; }
         $("cart-list").querySelectorAll(".rm").forEach(function (b) { b.onclick = function () {
             cart.splice(+b.dataset.i, 1); save("heritage.cart", cart); updateCounts(); renderCart(); }; });
         $("cart-sum").textContent = rub(cartTotal());
+        if (promos.length) promoNote("c-promo");
         $("cart-form").hidden = !cart.length; $("c-done").hidden = true;
         $("c-send").disabled = !cart.length;
     }
@@ -948,14 +987,15 @@ img { display: block; max-width: 100%; }
         if (digits.length < 10 || digits.length > 15) return err("Проверьте номер, например +7 900 123-45-67");
         $("c-error").textContent = "";
         var positions = cart.map(function (it) { return { product_id: it.product_id, fabric: it.fabric, items: it.items, options: it.options }; });
-        var payload = { name: name, phone: phone, comment: $("c-comment").value.trim().slice(0, 600), cart: positions };
+        var payload = { name: name, phone: phone, comment: $("c-comment").value.trim().slice(0, 600), cart: positions,
+                        promo: promoNorm($("c-promo").value) };
         var done = function () {
             cart = []; save("heritage.cart", cart); updateCounts();
             $("cart-form").hidden = true; $("c-done").hidden = false; $("cart-list").innerHTML = ""; haptic("ok");
         };
         if (inTelegram && !(tg && tg.initData) && tg.sendData) { tg.sendData(JSON.stringify(payload)); return; }
         if (!inTelegram || !onServer) {  // витрина на GitHub или MAX: передаём кодом в start бота
-            var code = startCode(phone, positions);
+            var code = startCode(phone, positions, payload.promo);
             done(); setTimeout(function () { openChat(code); }, 700);
             return;
         }
