@@ -11,8 +11,10 @@
 // telegram.org в РФ часто недоступен без VPN: грузим его скрипт только внутри Telegram, иначе MAX и сайт висят на белом экране
 if (/tgWebApp/.test(location.hash) || sessionStorage.getItem("__telegram__initParams"))
     document.write('<script src="https://telegram.org/js/telegram-web-app.js"><\/script>');
+// и скрипт MAX — только в MAX (в hash есть WebAppData): за границей st.max.ru тоже может тормозить
+else if (/WebAppData/.test(location.hash))
+    document.write('<script src="https://st.max.ru/js/max-web-app.js"><\/script>');
 </script>
-<script src="https://st.max.ru/js/max-web-app.js"></script>
 <link href="vendor/fonts/fonts.css" rel="stylesheet">
 <link href="vendor/lenis/lenis.css" rel="stylesheet">
 <style>
@@ -796,14 +798,16 @@ img { display: block; max-width: 100%; }
     function startCode(phone, positions) {
         // P<телефон>L<товар>F<№ материала>I<вариант>x<кол-во>… — бот разбирает так же (SHOWCASE_CODE)
         var code = "P" + phone.replace(/\D/g, "");
+        var dropped = 0;
         positions.forEach(function (it) {
             var p = products.find(function (x) { return x.id === it.product_id; });
             var mats = p ? materialsOf(p) : [], i = mats.indexOf(it.fabric);
             var part = "L" + it.product_id + "F" + (i >= 0 ? i : "z");
             Object.keys(it.items).forEach(function (id) { part += "I" + id + "x" + it.items[id]; });
-            if ((code + part).length <= 64) code += part;
+            if ((code + part).length <= 61) code += part; else dropped++;
         });
-        return code;
+        // не влезшие в лимит ссылки (64) позиции не выбрасываем молча: X<сколько> — менеджер уточнит при звонке
+        return dropped ? code + "X" + dropped : code;
     }
     function viaStartLink(payload) {
         var code = startCode(payload.phone, [payload]);
