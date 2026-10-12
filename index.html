@@ -8,6 +8,7 @@
 <meta name="description" content="Каталог мебели салона «Наследие»: диваны, кресла, кровати. Выберите размер и ткань, цена считается сразу.">
 <link rel="icon" href="brand/favicon.svg" type="image/svg+xml">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://st.max.ru/js/max-web-app.js"></script>
 <link href="vendor/fonts/fonts.css" rel="stylesheet">
 <link href="vendor/lenis/lenis.css" rel="stylesheet">
 <style>
@@ -384,6 +385,9 @@ img { display: block; max-width: 100%; }
     gsap.registerPlugin(Flip);
     var tg = window.Telegram && Telegram.WebApp;
     var inTelegram = !!(tg && tg.platform && tg.platform !== "unknown");
+    var mx = window.WebApp;  // мини-приложение MAX: без ready() MAX держит пустой экран загрузки
+    var inMax = !inTelegram && !!(mx && mx.initData);
+    if (inMax) mx.ready();
     var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
     var D = reduce ? 0 : 1;
     var $ = function (id) { return document.getElementById(id); };
@@ -811,6 +815,7 @@ img { display: block; max-width: 100%; }
     var MAX_BOT = "https://max.ru/id165717060130_bot";
     function openChat(code) {
         if (inTelegram) tg.openTelegramLink("https://t.me/Heritage_content_bot?start=" + code);
+        else if (inMax) mx.openMaxLink(MAX_BOT + "?start=" + code);
         else location.href = MAX_BOT + "?start=" + code;
     }
     function submit() {
