@@ -204,6 +204,15 @@ img { display: block; max-width: 100%; }
 .done svg { color: var(--brand); margin: 0 auto 6px; }
 .done h3 { font-size: 20px; margin: 0 0 6px; text-transform: none; letter-spacing: 0; }
 .done p { margin: 0; color: var(--muted); }
+.consent { margin: 12px 0 0; font-size: 12px; line-height: 1.4; color: var(--muted); }
+/* телефон: первые товары — на первом экране; панель фильтров не липнет (занимала четверть экрана) */
+@media (max-width: 640px) {
+    .intro { margin: 16px 0 12px; }
+    .hero .actions { display: none; }
+    .catalog { padding-top: 20px; }
+    .filters { position: static; }
+}
+.chat-pick { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
 
 /* шапка: избранное и корзина */
 .bar-right { display: flex; align-items: center; gap: 18px; }
@@ -286,7 +295,7 @@ img { display: block; max-width: 100%; }
             <div class="tools">
                 <input type="search" id="search" placeholder="Поиск по названию" aria-label="Поиск по названию" autocomplete="off">
                 <select id="sort" aria-label="Сортировка">
-                    <option value="pop">Сначала популярные</option><option value="asc">Сначала дешевле</option>
+                    <option value="pop">Рекомендуем</option><option value="asc">Сначала дешевле</option>
                     <option value="desc">Сначала дороже</option><option value="new">Сначала новинки</option>
                 </select>
                 <select id="price" aria-label="Цена">
@@ -351,6 +360,7 @@ img { display: block; max-width: 100%; }
                 <label for="f-comment">Пожелания <span>необязательно</span></label>
                 <textarea id="f-comment" rows="3" maxlength="600" placeholder="Цвет, когда удобно позвонить, адрес доставки"></textarea>
                 <div class="promo-box" hidden><label for="f-promo">Промокод <span>необязательно</span></label><input id="f-promo" autocapitalize="characters" autocomplete="off" maxlength="30"><p class="promo-note" id="f-promo-note" aria-live="polite"></p></div>
+                <p class="consent">Отправляя заявку, вы соглашаетесь на обработку персональных данных для связи по заявке.</p>
                 <p class="error" id="f-error" role="alert"></p>
             </form>
             <div class="done" id="done" hidden>
@@ -377,6 +387,7 @@ img { display: block; max-width: 100%; }
             <button type="button" class="share" id="c-share" hidden>Подставить номер из Telegram</button>
             <label for="c-comment">Пожелания <span>необязательно</span></label><textarea id="c-comment" rows="2" maxlength="600"></textarea>
             <div class="promo-box" hidden><label for="c-promo">Промокод <span>необязательно</span></label><input id="c-promo" autocapitalize="characters" autocomplete="off" maxlength="30"><p class="promo-note" id="c-promo-note" aria-live="polite"></p></div>
+            <p class="consent">Отправляя заявку, вы соглашаетесь на обработку персональных данных для связи по заявке.</p>
             <p class="error" id="c-error" role="alert"></p>
             <button type="submit" class="cta-inline" id="c-send">Отправить заявку на всё</button>
         </form>
@@ -553,7 +564,9 @@ img { display: block; max-width: 100%; }
         var notes = uniq(p.variants.map(function (v) { return v.note; }));
         var terms = [];
         if (p.stock) terms.push(["Со склада", "готовые модели в складской ткани — быстрее всего"]);
-        notes.forEach(function (n) { terms.push(["Изготовление", n]); });
+        // в note через «;» лежат и срок, и тип угла («10–17 рабочих дней; универсальный угол»)
+        uniq([].concat.apply([], notes.map(function (n) { return n.split(";"); })).map(function (s) { return s.trim(); }).filter(Boolean))
+            .forEach(function (n) { terms.push(/угол/i.test(n) ? ["Угол", n.replace(/\s*угол\s*/i, "")] : ["Изготовление", n]); });
         terms.push(["Цена", "по прайсу, точную сумму подтвердит консультант"]);
         $("d-terms").innerHTML = terms.map(function (t) { return "<li><span>" + esc(t[0]) + "</span><span>" + esc(t[1]) + "</span></li>"; }).join("");
         $("b-desc").hidden = !p.description;
@@ -812,11 +825,28 @@ img { display: block; max-width: 100%; }
         // не влезшие в лимит ссылки (64) позиции не выбрасываем молча: X<сколько> — менеджер уточнит при звонке
         return code + (dropped ? "X" + dropped : "") + tail;
     }
+    // В обычном браузере у посетителя может не быть MAX (раньше такие заявки терялись): даём выбрать мессенджер,
+    // заявка дойдёт до бота, когда он нажмёт «Старт» — поэтому «принята» не пишем
+    function pickChat(box, code, onPick) {
+        box.querySelector("h3").textContent = "Остался один шаг";
+        box.querySelector("p").textContent = "Откройте чат и нажмите «Старт» — заявка сразу придёт консультанту.";
+        var links = box.querySelector(".chat-pick") || box.appendChild(document.createElement("div"));
+        links.className = "chat-pick";
+        links.innerHTML = '<a class="btn-line" target="_blank" rel="noopener" href="https://t.me/Heritage_content_bot?start=' + code + '">Telegram</a>' +
+                          '<a class="btn-line" target="_blank" rel="noopener" href="' + MAX_BOT + "?start=" + code + '">MAX</a>';
+        links.onclick = function (e) { if (onPick && e.target.closest("a")) onPick(); };
+    }
     function viaStartLink(payload) {
         var code = startCode(payload.phone, [payload], payload.promo);
-        // показать результат, затем перейти в чат: Telegram отправит боту /start с кодом заявки
         step = "done"; haptic("ok");
         $("lead").hidden = true; $("cfg").hidden = true; $("done").hidden = false;
+        if (!inMax) {
+            pickChat($("done"), code);
+            $("done").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+            setCTA("Вернуться в каталог");
+            return;
+        }
+        // в MAX: показать результат, затем перейти в чат — MAX отправит боту bot_started с кодом заявки
         $("done").querySelector("p").textContent = "Открываем чат с консультантом — заявка уйдёт автоматически.";
         $("done").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
         setCTA("Вернуться в каталог");
@@ -996,6 +1026,11 @@ img { display: block; max-width: 100%; }
         if (inTelegram && !(tg && tg.initData) && tg.sendData) { tg.sendData(JSON.stringify(payload)); return; }
         if (!inTelegram || !onServer) {  // витрина на GitHub или MAX: передаём кодом в start бота
             var code = startCode(phone, positions, payload.promo);
+            if (!inTelegram && !inMax) {  // браузер: корзину чистим, только когда выбран мессенджер
+                $("cart-form").hidden = true; $("c-done").hidden = false;
+                pickChat($("c-done"), code, function () { cart = []; save("heritage.cart", cart); updateCounts(); $("cart-list").innerHTML = ""; });
+                return;
+            }
             done(); setTimeout(function () { openChat(code); }, 700);
             return;
         }
