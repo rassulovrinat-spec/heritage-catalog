@@ -840,13 +840,13 @@ img { display: block; max-width: 100%; }
         var code = startCode(payload.phone, [payload], payload.promo);
         step = "done"; haptic("ok");
         $("lead").hidden = true; $("cfg").hidden = true; $("done").hidden = false;
-        if (!inMax) {
+        if (!inTelegram && !inMax) {  // выбор мессенджера — только в обычном браузере
             pickChat($("done"), code);
             $("done").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
             setCTA("Вернуться в каталог");
             return;
         }
-        // в MAX: показать результат, затем перейти в чат — MAX отправит боту bot_started с кодом заявки
+        // в Telegram/MAX: показать результат, затем перейти в чат своего бота — он получит код заявки в start
         $("done").querySelector("p").textContent = "Открываем чат с консультантом — заявка уйдёт автоматически.";
         $("done").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
         setCTA("Вернуться в каталог");
