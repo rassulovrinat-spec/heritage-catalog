@@ -466,7 +466,7 @@ img { display: block; max-width: 100%; }
 
     function buildHighlights() {
         var cats = uniq(products.map(function (p) { return p.category; }));
-        var HL_PHOTO = {"Диваны": "brand/hl-divany.jpg", "Кровати": "brand/hl-krovati.jpg", "Матрасы": "brand/hl-matrasy.jpg", "Кресла": "brand/hl-kresla.jpg", "Столы": "brand/hl-stoly.jpg", "Стулья": "brand/hl-stulya.jpg", "Малые формы": "brand/hl-malye.jpg", "Тумбы": "brand/hl-tumby.jpg", "Пуфы": "brand/hl-pufy.jpg"};  // круги: tools/hl_circles.py (выбор Рината 23.10, без теней, модель целиком)
+        var HL_PHOTO = {"Диваны": "brand/hl-divany.jpg?v=a207bafe", "Кровати": "brand/hl-krovati.jpg?v=1caef03e", "Матрасы": "brand/hl-matrasy.jpg?v=cca1bbd8", "Кресла": "brand/hl-kresla.jpg?v=ae007c23", "Столы": "brand/hl-stoly.jpg?v=55e1fba3", "Стулья": "brand/hl-stulya.jpg?v=e51ddaab", "Малые формы": "brand/hl-malye.jpg?v=d4b4d17b", "Тумбы": "brand/hl-tumby.jpg?v=50da181b", "Пуфы": "brand/hl-pufy.jpg?v=4454d18a"};  // круги: tools/hl_circles.py (выбор Рината 23.10, без теней, модель целиком)
         $("highlights").innerHTML = cats.map(function (c) {
             var inCat = products.filter(function (x) { return x.category === c; }), photo = "";
             inCat.some(function (x) { return x.photos.some(function (f) { return f.indexOf("/white/") > -1 && (photo = f); }); });
