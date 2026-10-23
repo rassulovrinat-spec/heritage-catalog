@@ -466,7 +466,7 @@ img { display: block; max-width: 100%; }
 
     function buildHighlights() {
         var cats = uniq(products.map(function (p) { return p.category; }));
-        var HL_PHOTO = { "Диваны": "brand/hl-divany.jpg" };  // «Милан», вид спереди (Ринат 23.10): фото фабрики, вписан в круг целиком
+        var HL_PHOTO = { "Диваны": "brand/hl-divany.jpg", "Матрасы": "brand/hl-matrasy.jpg", "Кресла": "brand/hl-kresla.jpg", "Столы": "brand/hl-stoly.jpg", "Стулья": "brand/hl-stulya.jpg" };  // «Премиум Делюкс», «Кресло Милана», «Авалон 1600», «Алрик»  // «Милан», вид спереди (Ринат 23.10): фото фабрики, вписан в круг целиком
         $("highlights").innerHTML = cats.map(function (c) {
             var inCat = products.filter(function (x) { return x.category === c; }), photo = "";
             inCat.some(function (x) { return x.photos.some(function (f) { return f.indexOf("/white/") > -1 && (photo = f); }); });
