@@ -466,10 +466,12 @@ img { display: block; max-width: 100%; }
 
     function buildHighlights() {
         var cats = uniq(products.map(function (p) { return p.category; }));
+        var HL_PHOTO = { "Диваны": "brand/hl-divany.jpg" };  // «Милан» (Ринат 23.10): фото фабрики, кадрирован под круг
         $("highlights").innerHTML = cats.map(function (c) {
             var inCat = products.filter(function (x) { return x.category === c; }), photo = "";
             inCat.some(function (x) { return x.photos.some(function (f) { return f.indexOf("/white/") > -1 && (photo = f); }); });
             photo = photo || (inCat.find(function (x) { return x.photos.length; }) || { photos: [""] }).photos[0];
+            if (HL_PHOTO[c]) photo = HL_PHOTO[c];  // свой кадр для круга: модель целиком, без обрезки краёв
             return '<button type="button" class="hl" data-c="' + esc(c) + '" aria-pressed="false"><span class="ring"><span>' +
                 (photo ? '<img src="' + esc(photo) + '" alt="" loading="lazy">' : '<img class="mono" src="brand/favicon.svg" alt="">') + '</span></span><span class="lbl">' + esc(c) + "</span></button>";
         }).join("");
