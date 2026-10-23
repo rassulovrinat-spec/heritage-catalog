@@ -273,6 +273,12 @@ img { display: block; max-width: 100%; }
 .promo-line { display: inline-block; margin: 10px 0 0; padding: 6px 12px; border-radius: 999px; background: #1F4A45; color: #fff;
               font-size: 13px; font-weight: 600; letter-spacing: .01em; }
 .hl .lbl { color: #2b2a28; }
+/* круги категорий как сторис: контур в тон бренда виден всегда, выбранный — толстое тёмно-зелёное кольцо со свечением */
+.hl .ring, .in-tg .hl .ring { border: 2px solid #9FB8B3; padding: 3px; background: #fff; transition: border-color .2s ease, box-shadow .2s ease; }
+.hl[aria-pressed="true"] .ring, .in-tg .hl[aria-pressed="true"] .ring { border: 3px solid #1F4A45; padding: 2px;
+        box-shadow: 0 0 0 3px rgba(31, 74, 69, .16), 0 6px 14px -6px rgba(31, 74, 69, .55); }
+.hl[aria-pressed="true"] .lbl { color: #1F4A45; font-weight: 700; }
+@media (hover: hover) { .hl:hover .ring { border-color: #1F4A45; } }
 .highlights, .in-tg .highlights { padding-bottom: 16px; }
 .bar nav a.tg { display: none; }
 </style>
