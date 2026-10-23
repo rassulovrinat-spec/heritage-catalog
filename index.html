@@ -270,7 +270,7 @@ img { display: block; max-width: 100%; }
         <div class="bar">
             <a class="logo" href="./"><img src="brand/favicon.svg" alt=""><span>НАСЛЕДИЕ</span></a>
             <div class="bar-right">
-                <nav aria-label="Разделы"><a href="#catalog">каталог</a><a href="#how">как заказать</a><a class="tg" href="https://t.me/Heritage_content_bot">telegram</a></nav>
+                <nav aria-label="Разделы"><a href="#catalog">каталог</a><a href="#how">как заказать</a><a class="tg" href="https://t.me/Heritage_content_bot">Telegram</a></nav>
                 <button class="icon-btn" id="fav-btn" type="button" aria-label="Избранное"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20s-7-4.4-9.3-9A5.2 5.2 0 0 1 12 6a5.2 5.2 0 0 1 9.3 5c-2.3 4.6-9.3 9-9.3 9z"/></svg><span class="count num" id="fav-count" hidden></span></button>
                 <button class="icon-btn" id="cart-btn" type="button" aria-label="Корзина"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 4h2l2.4 11.2a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.5-1.1L21 8H6.2"/><circle cx="9.5" cy="20" r="1.3"/><circle cx="17.5" cy="20" r="1.3"/></svg><span class="count num" id="cart-count" hidden></span></button>
             </div>
@@ -634,7 +634,9 @@ img { display: block; max-width: 100%; }
         var lart = /зк|склад/.test(keys);  // категории ЗК/Склад — у мягкой мебели; у столов и стульев свои материалы
         $("fab-title").textContent = lart ? "Ткань" : /пластик|лдсп|стекл|керамик|матов/.test(keys) ? "Материал столешницы" : /ткань/.test(keys) ? "Ткань обивки" : "Материал";
         $("fab-sub").textContent = lart ? "Категория — это ценовая группа ткани в прайсе фабрики. Цвет и образцы консультант пришлёт после заявки."
-            : "Цена зависит от материала. Цвет и образцы консультант пришлёт после заявки.";
+            : vs.some(function (v) { var pr = Object.values(v.prices || {}); return pr.some(function (x) { return x !== pr[0]; }); })
+            ? "Цена зависит от материала. Цвет и образцы консультант пришлёт после заявки."
+            : "Цена одинаковая для всех вариантов — выберите по вкусу. Цвет и образцы консультант пришлёт после заявки.";
         $("fab-explain").hidden = !lart;
         if (!vs.length) { updateTotal(); return; }
         $("v-title").textContent = p.modular ? "Соберите комплект" : vs.length > 1 ? "Размер и исполнение" : "Исполнение";
@@ -706,17 +708,17 @@ img { display: block; max-width: 100%; }
         var avail = availableFabrics();
         var cheapest = avail.length ? Math.min.apply(null, avail.map(sumFor)) : 0;
         var dearest = avail.length ? Math.max.apply(null, avail.map(sumFor)) : 0;
-        $("fab-range").textContent = avail.length > 1
+        $("fab-range").textContent = avail.length > 1 && dearest > cheapest
             ? "Для выбранного варианта ткань меняет цену от " + rub(cheapest) + " до " + rub(dearest) +
               " — разница " + rub(dearest - cheapest) + " (+" + Math.round((dearest - cheapest) / cheapest * 100) + "%)."
-            : "";
+            : avail.length > 1 ? "Цена одинаковая для всех материалов." : "";
         $("fabrics").innerHTML = allFabrics().map(function (k) {
             var on = avail.indexOf(k) >= 0;
             var diff = on ? sumFor(k) - cheapest : 0;
             return '<button type="button" class="fabric" data-f="' + esc(k) + '" aria-pressed="' + (k === cfg.fabric) + '"' + (on ? "" : " disabled") +
                 '><span class="t">' + esc(fabricName(k)) + '</span><span class="p num">' +
                 (on ? rub(sumFor(k)) : selected().length ? "нет для выбранного" : "сначала выберите размер") + "</span>" +
-                (on && diff > 0 ? '<span class="d num">+' + rub(diff) + "</span>" : on ? '<span class="d">самая доступная</span>' : "") + "</button>";
+                (on && diff > 0 ? '<span class="d num">+' + rub(diff) + "</span>" : on && dearest > cheapest ? '<span class="d">самая доступная</span>' : "") + "</button>";
         }).join("");
         $("fabrics").querySelectorAll(".fabric").forEach(function (b) { b.onclick = function () {
             cfg.fabric = b.dataset.f; haptic(); renderFabrics(); updateTotal();
