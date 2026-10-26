@@ -15,6 +15,7 @@ if (/tgWebApp/.test(location.hash) || sessionStorage.getItem("__telegram__initPa
 else if (/WebAppData/.test(location.hash))
     document.write('<script src="https://st.max.ru/js/max-web-app.js"><\/script>');
 </script>
+<link rel="preload" href="vendor/fonts/manrope-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link href="vendor/fonts/fonts.css" rel="stylesheet">
 <link href="vendor/lenis/lenis.css" rel="stylesheet">
 <style>
@@ -55,9 +56,9 @@ img { display: block; max-width: 100%; }
 .btn-line { display: inline-flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 22px; border: 1px solid var(--line-strong);
             background: transparent; color: var(--ink); text-decoration: none; font-size: 14px; font-weight: 500; }
 .btn-line::after { content: "»"; font-size: 16px; }
-.btn-line:hover { background: var(--ink); color: var(--bg); }
+@media (hover: hover) { .btn-line:hover { background: var(--ink); color: var(--bg); } }
 /* Mini App: белый фон, как на сайте Марины Ефимовой (maryeefi.com) */
-.in-tg { --surface: #FFFFFF; --line: #EBEBEB; --line-strong: #111111; --ink: #111111; --muted: #6B6B6B; --soft: #888888; --tile: #FFFFFF; --bg: #FFFFFF; }
+.in-tg { --surface: #FFFFFF; --line: #EBEBEB; --line-strong: #111111; --ink: #111111; --muted: #6B6B6B; --soft: #6F6F6F; --tile: #FFFFFF; --bg: #FFFFFF; }
 /* в Telegram сразу к каталогу */
 .in-tg .hero { padding: 12px 0 0; }
 .in-tg .intro { margin: 14px 0 6px; }
@@ -117,6 +118,14 @@ img { display: block; max-width: 100%; }
 .card .price { margin-top: 3px; font-size: 14px; font-weight: 600; }
 .card .price .from { font-weight: 400; color: var(--muted); }
 .empty { color: var(--muted); padding: 30px 0; grid-column: 1 / -1; }
+.empty .btn-line { margin-top: 14px; }
+.sk .ph { border-color: #F1F1F1; background: linear-gradient(100deg, #F4F4F4 30%, #FAFAFA 50%, #F4F4F4 70%) 0 0 / 300% 100%; animation: sk 1.3s linear infinite; }
+.sk .ln { height: 12px; margin: 12px 2px 0; width: 70%; background: #F2F2F2; } .sk .ln + .ln { width: 40%; margin-top: 8px; }
+@keyframes sk { to { background-position: -150% 0; } }
+@media (prefers-reduced-motion: reduce) { .sk .ph { animation: none; } }
+.more-sentinel { grid-column: 1 / -1; height: 1px; }
+.count .reset { border: 0; background: none; padding: 0 0 0 8px; min-height: 44px; color: var(--brand); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.specs li.sub span:first-child { padding-left: 12px; }
 
 /* ── Модель ── */
 .sheet { position: fixed; inset: 0; z-index: 20; background: var(--bg); overflow-y: auto; visibility: hidden; overscroll-behavior: contain; }
@@ -165,7 +174,7 @@ img { display: block; max-width: 100%; }
 .module .t { font-weight: 500; line-height: 1.35; }
 .module .s { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
 .stepper { display: flex; align-items: center; flex: 0 0 auto; border: 1px solid var(--line); background: var(--surface); }
-.stepper button { width: 40px; height: 40px; border: 0; background: none; font-size: 18px; line-height: 1; }
+.stepper button { width: 44px; height: 44px; border: 0; background: none; font-size: 18px; line-height: 1; }
 .stepper button:disabled { opacity: .3; cursor: default; }
 .stepper output { min-width: 28px; text-align: center; font-weight: 600; }
 .fabrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
@@ -211,6 +220,7 @@ img { display: block; max-width: 100%; }
     .hero .actions { display: none; }
     .catalog { padding-top: 20px; }
     .filters { position: static; }
+    #cats { display: none; }
 }
 .chat-pick { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
 
@@ -221,19 +231,19 @@ img { display: block; max-width: 100%; }
 .in-tg .bar .bar-right nav { display: none; }
 /* инструменты каталога */
 .tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 10px 0; }
-.tools input[type=search], .tools select { font: 15px var(--sans); height: 42px; padding: 0 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 0; }
+.tools input[type=search], .tools select { font: 16px var(--sans); height: 44px; padding: 0 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 0; }
 .tools input[type=search] { flex: 1 1 220px; min-width: 0; }
-.only-fav { display: flex; align-items: center; gap: 6px; font-size: 14px; height: 42px; padding: 0 6px; cursor: pointer; }
+.only-fav { display: flex; align-items: center; gap: 6px; font-size: 14px; height: 44px; padding: 0 6px; cursor: pointer; }
 .only-fav input { width: 18px; height: 18px; accent-color: var(--ink); }
 /* карточка: сердечко, размеры */
-.card .heart-mini { position: absolute; right: 8px; top: 8px; z-index: 2; width: 38px; height: 38px; border: 0; border-radius: 50%; background: rgba(255,255,255,.9); color: var(--ink); display: flex; align-items: center; justify-content: center; }
+.card .heart-mini { position: absolute; right: 8px; top: 8px; z-index: 2; width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(255,255,255,.9); color: var(--ink); display: flex; align-items: center; justify-content: center; }
 .card .heart-mini[aria-pressed="true"], .heart[aria-pressed="true"] { color: #C0392B; }
 .card .heart-mini[aria-pressed="true"] svg, .heart[aria-pressed="true"] svg { fill: currentColor; }
 .card .spec { margin-top: 2px; font-size: 12px; color: var(--muted); }
 .badge.new { background: var(--brand); }
 /* модель: в корзину / в избранное */
 .buy-row { display: flex; gap: 8px; margin-top: 14px; }
-.buy-row .btn-line { flex: 1; justify-content: center; min-height: 48px; }
+.buy-row .btn-line { flex: 1; justify-content: center; min-height: 48px; border-color: var(--line); }
 .buy-row .btn-line::after { content: none; }
 .buy-row .btn-line:disabled { opacity: .4; cursor: default; }
 .heart { width: 48px; height: 48px; border: 1px solid var(--line-strong); background: transparent; color: var(--ink); display: flex; align-items: center; justify-content: center; }
@@ -249,8 +259,9 @@ img { display: block; max-width: 100%; }
 .cart-list img { width: 64px; height: 64px; object-fit: contain; border: 1px solid #EEEEEE; background: #fff; }
 .cart-list .t { font-weight: 600; font-size: 14px; } .cart-list .s { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .cart-list .p { font-size: 14px; font-weight: 600; text-align: right; }
-.cart-list .rm { border: 0; background: none; color: var(--muted); font-size: 13px; text-decoration: underline; padding: 6px 0 0; min-height: 32px; }
-.cart-empty { color: var(--muted); padding: 20px 0; }
+.cart-list .rm { border: 0; background: none; color: var(--muted); font-size: 13px; text-decoration: underline; padding: 6px 0 0; min-height: 44px; }
+.cart-list li.cart-empty { display: block; color: var(--muted); padding: 20px 0; border-bottom: 0; }  /* не в сетку 64px|1fr|auto */
+.cart-empty .btn-line { margin-top: 14px; }
 .cart-total { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 0; font-size: 15px; }
 .cart-total b { font-size: 22px; }
 .promo-note { margin: 4px 0 0; font-size: 13px; color: var(--muted); min-height: 1em; }
@@ -281,6 +292,13 @@ img { display: block; max-width: 100%; }
 @media (hover: hover) { .hl:hover .ring { border-color: #1F4A45; } }
 .highlights, .in-tg .highlights { padding-bottom: 16px; }
 .bar nav a.tg { display: none; }
+/* телефон: фильтры компактнее — поиск на всю ширину, сортировка и цена в одну строку; избранное — сердечко в шапке */
+@media (max-width: 640px) {
+    .tools { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .tools input[type=search] { grid-column: 1 / -1; }
+    .tools select { width: 100%; min-width: 0; }
+    .only-fav { display: none; }
+}
 </style>
 </head>
 <body>
@@ -453,14 +471,28 @@ img { display: block; max-width: 100%; }
 
     var products = [], state = { cat: "", sub: "" }, current = null, cfg = null, step = "cfg";
 
-    fetch("api/catalog").then(function (r) { if (!r.ok) throw r; return r.json(); }).then(function (data) {
+    // скелетон тех же размеров, что карточки: нет пустого экрана, пока грузится каталог
+    $("grid").innerHTML = new Array(8).join('<div class="card sk" aria-hidden="true"><div class="ph"></div><div class="ln"></div><div class="ln"></div></div>');
+    var getJSON = function (url) { return fetch(url).then(function (r) { if (!r.ok) throw r; return r.json(); }); };
+    // GitHub Pages: лёгкий список для сетки (подробности модели — api/m/<id>.json); сервер витрины отдаёт полный api/catalog
+    getJSON("api/catalog-list").catch(function () { return getJSON("api/catalog"); }).then(function (data) {
         products = data;
-        $("count").textContent = data.length + " моделей с ценами";
         buildHighlights(); buildChips(); renderGrid();
         openFromHash();
     }).catch(function () {
+        $("grid").innerHTML = "";
         $("count").textContent = "Каталог не загрузился. Проверьте интернет и обновите страницу.";
     });
+    // подробности модели (варианты, ткани, характеристики) — по требованию, один раз
+    var details = {};
+    function ensureDetail(p) {
+        if (p.variants) return Promise.resolve(p);
+        if (!details[p.id]) details[p.id] = getJSON("api/m/" + p.id + ".json").then(function (d) {
+            Object.keys(d).forEach(function (k) { p[k] = d[k]; }); return p;
+        }).catch(function (e) { delete details[p.id]; throw e; });
+        return details[p.id];
+    }
+    function byId(id) { return products.find(function (x) { return x.id === id; }); }
 
     function uniq(a) { return a.filter(function (v, i) { return v && a.indexOf(v) === i; }); }
 
@@ -470,13 +502,14 @@ img { display: block; max-width: 100%; }
         $("highlights").innerHTML = cats.map(function (c) {
             var inCat = products.filter(function (x) { return x.category === c; }), photo = "";
             inCat.some(function (x) { return x.photos.some(function (f) { return f.indexOf("/white/") > -1 && (photo = f); }); });
-            photo = photo || (inCat.find(function (x) { return x.photos.length; }) || { photos: [""] }).photos[0];
+            var first = inCat.find(function (x) { return x.photos.length; });
+            photo = photo || (first ? (first.thumb ? first.thumb.jpg : first.photos[0]) : "");  // превью 480 px, а не фото 1200 px
             if (HL_PHOTO[c]) photo = HL_PHOTO[c];  // свой кадр для круга: модель целиком, без обрезки краёв
             return '<button type="button" class="hl" data-c="' + esc(c) + '" aria-pressed="false"><span class="ring"><span>' +
                 (photo ? '<img src="' + esc(photo) + '" alt="" loading="lazy">' : '<img class="mono" src="brand/favicon.svg" alt="">') + '</span></span><span class="lbl">' + esc(c) + "</span></button>";
         }).join("");
         $("highlights").querySelectorAll(".hl").forEach(function (b) { b.onclick = function () {
-            haptic(); pickCategory(b.dataset.c);
+            haptic(); pickCategory(state.cat === b.dataset.c ? "" : b.dataset.c);
             var top = $("catalog").getBoundingClientRect().top + scrollY;
             lenis ? lenis.scrollTo(top, { duration: .9 }) : scrollTo({ top: top, behavior: reduce ? "auto" : "smooth" });
         }; });
@@ -522,9 +555,11 @@ img { display: block; max-width: 100%; }
     function pickSub(v) { state.sub = v; press($("subs"), v); renderGrid(true); }
 
     // ── сетка ──
-    function cardHTML(p) {
+    function cardHTML(p, i) {
+        var att = i < 2 ? ' fetchpriority="high"' : ' loading="lazy"', img = '<img src="' + esc(p.thumb ? p.thumb.jpg : p.photos[0]) + '" alt="' + esc(p.name) +
+            '"' + att + ' decoding="async" data-flip-id="ph-' + p.id + '">';
         var ph = p.photos[0]
-            ? '<div class="ph' + (p.full[0] ? " full" : "") + '"><img src="' + esc(p.photos[0]) + '" alt="' + esc(p.name) + '" loading="lazy" data-flip-id="ph-' + p.id + '"></div>'
+            ? '<div class="ph' + (p.full[0] ? " full" : "") + '">' + (p.thumb ? '<picture><source type="image/webp" srcset="' + esc(p.thumb.webp) + '">' + img + "</picture>" : img) + "</div>"
             : '<div class="ph none"><img src="brand/favicon.svg" alt=""></div>';
         var badges = (p.new ? '<span class="badge new">Новинка</span>' : "") + (p.sale ? '<span class="badge sale">Распродажа</span>' : "");
         return '<div class="card" role="button" tabindex="0" data-id="' + p.id + '">' + (badges ? '<span class="badges">' + badges + "</span>" : "") +
@@ -545,17 +580,17 @@ img { display: block; max-width: 100%; }
             return ((a.price || 1e12) - (b.price || 1e12)) * (sort === "asc" ? 1 : -1); });
         if (sort === "new") list = list.slice().sort(function (a, b) { return (b.new ? 1 : 0) - (a.new ? 1 : 0); });
         var grid = $("grid");
+        var filtered = state.cat || state.sub || q || $("price").value || onlyFav;
+        $("count").innerHTML = esc(list.length + " " + plural(list.length, "модель", "модели", "моделей") + " с ценами") +
+            (filtered ? '<button type="button" class="reset" id="reset">Показать все</button>' : "");
+        if (filtered) $("reset").onclick = resetFilters;
         var draw = function () {
-            grid.innerHTML = list.length ? list.map(cardHTML).join("")
-                : '<p class="empty">' + (onlyFav ? "В избранном пока пусто: нажмите сердечко на карточке." : "Ничего не нашлось — измените поиск или фильтр.") + "</p>";
-            grid.querySelectorAll(".card").forEach(function (c) {
-                c.onclick = function (e) {
-                    var h = e.target.closest(".heart-mini");
-                    if (h) { e.stopPropagation(); toggleFav(+h.dataset.fav); h.setAttribute("aria-pressed", isFav(+h.dataset.fav)); return; }
-                    open(+c.dataset.id, c);
-                };
-                c.onkeydown = function (e) { if (e.key === "Enter") open(+c.dataset.id, c); };
-            });
+            shownList = list; shownN = 0;
+            grid.innerHTML = list.length ? ""
+                : '<div class="empty"><p>' + (onlyFav ? "В избранном пока пусто: нажмите сердечко на карточке." : "Ничего не нашлось — измените поиск или фильтр.") +
+                  '</p><button type="button" class="btn-line" id="empty-reset">Сбросить фильтры</button></div>';
+            if (!list.length) { $("empty-reset").onclick = resetFilters; return; }
+            more(false);
         };
         if (!animate || reduce) return draw();
         gsap.to(grid, { opacity: 0, duration: .15, ease: "power1.in", onComplete: function () {
@@ -564,10 +599,63 @@ img { display: block; max-width: 100%; }
         } });
     }
 
+    // сетка порциями: 466 карточек сразу — 5000 узлов и тормоза на дешёвых Android
+    var CHUNK = 24, shownList = [], shownN = 0, io = null;
+    function more(animate) {
+        var grid = $("grid"), old = grid.querySelector(".more-sentinel");
+        if (old) old.remove();
+        var part = shownList.slice(shownN, shownN + CHUNK), start = shownN;
+        shownN += part.length;
+        grid.insertAdjacentHTML("beforeend", part.map(function (p, j) { return cardHTML(p, start + j); }).join("") +
+            (shownN < shownList.length ? '<div class="more-sentinel" aria-hidden="true"></div>' : ""));
+        if (animate && D && part.length) {  // появление догруженных — только первые 6, без привязки к скроллу
+            var added = [].slice.call(grid.querySelectorAll(".card")).slice(start, start + 6);
+            gsap.from(added, { opacity: 0, y: 12, duration: .35, ease: "expo.out", stagger: .04 });
+        }
+        var s = grid.querySelector(".more-sentinel");
+        if (!s) return;
+        if (!("IntersectionObserver" in window)) { more(false); return; }  // очень старый WebView: всё сразу
+        if (!io) io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) more(true); }, { rootMargin: "800px 0px" });
+        io.disconnect(); io.observe(s);
+    }
+    function plural(n, one, few, many) {
+        var m10 = n % 10, m100 = n % 100;
+        return m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many;
+    }
+    function resetFilters() {
+        $("search").value = ""; $("price").value = ""; $("only-fav").checked = false;
+        state.cat = ""; state.sub = ""; press($("cats"), ""); buildSubs(); syncHighlights(); renderGrid(true);
+    }
+    $("grid").addEventListener("click", function (e) {
+        var c = e.target.closest(".card[data-id]"); if (!c) return;
+        var h = e.target.closest(".heart-mini");
+        if (h) { e.stopPropagation(); toggleFav(+h.dataset.fav); h.setAttribute("aria-pressed", isFav(+h.dataset.fav)); return; }
+        open(+c.dataset.id, c);
+    });
+    $("grid").addEventListener("keydown", function (e) {
+        var c = e.target.closest && e.target.closest(".card[data-id]");
+        if (c && e.key === "Enter") open(+c.dataset.id, c);
+    });
+    // подробности модели — заранее, при касании: к моменту отпускания пальца они уже пришли
+    $("grid").addEventListener("pointerdown", function (e) {
+        var c = e.target.closest(".card[data-id]"), p = c && byId(+c.dataset.id);
+        if (p) ensureDetail(p).catch(function () {});
+    }, { passive: true });
+
     // ── модель ──
     function open(id, card) {
-        var p = products.find(function (x) { return x.id === id; });
+        var p = byId(id);
         if (!p) return;
+        if (!p.variants) {  // подробности ещё не пришли: Flip-состояние снимаем сейчас, пока карточка на месте
+            var fromImg = card && card.querySelector("img[data-flip-id]");
+            var st = fromImg && !reduce ? Flip.getState(fromImg) : null;
+            ensureDetail(p).then(function () { reallyOpen(p, card, st); })
+                .catch(function () { toast("Не удалось открыть модель. Проверьте интернет"); });
+            return;
+        }
+        reallyOpen(p, card);
+    }
+    function reallyOpen(p, card, flipSt) {
         current = p; step = "cfg"; haptic("tap");
         if (history.replaceState) history.replaceState(null, "", "#m" + p.id);
         var photos = p.photos.length ? p.photos : ["brand/favicon.svg"];
@@ -597,6 +685,10 @@ img { display: block; max-width: 100%; }
         $("d-name").textContent = p.name;
         $("d-where").textContent = p.category + (p.sub && p.sub !== p.category ? ", " + p.sub.toLowerCase() : "");
         $("d-specs").innerHTML = Object.keys(p.specs).map(function (k) {
+            var parts = String(p.specs[k]).split(/,\s*/), pairs = parts.map(function (x) { return x.match(/^([А-ЯЁа-яё][а-яё ]+?)\s+(\d.*)$/); });
+            if (parts.length > 1 && pairs.every(Boolean))  // «Высота 750 мм, Ширина 1200 мм» — строками, цифры в столбик
+                return "<li><span>" + esc(k) + "</span><span></span></li>" + pairs.map(function (m) {
+                    return '<li class="sub"><span>' + esc(m[1]) + '</span><span class="num">' + esc(m[2]) + "</span></li>"; }).join("");
             return "<li><span>" + esc(k) + "</span><span>" + esc(p.specs[k]) + "</span></li>";
         }).join("") || "<li><span>Характеристики уточнит консультант</span><span></span></li>";
         $("d-desc").textContent = p.description;
@@ -605,7 +697,7 @@ img { display: block; max-width: 100%; }
         setupConfig(p);
 
         var sheet = $("sheet"), from = card && card.querySelector("img[data-flip-id]");
-        var flipState = from && !reduce ? Flip.getState(from) : null;
+        var flipState = flipSt || (from && !reduce ? Flip.getState(from) : null);
         sheet.scrollTop = 0;
         gsap.set(sheet, { autoAlpha: 1, y: 0 });
         if (lenis) lenis.stop();
@@ -653,13 +745,13 @@ img { display: block; max-width: 100%; }
         $("b-variants").hidden = !vs.length; $("b-fabric").hidden = !vs.length;
         renderOptions(p);
         var keys = allFabrics().join(" ").toLowerCase();
-        var lart = /зк|склад/.test(keys);  // категории ЗК/Склад — у мягкой мебели; у столов и стульев свои материалы
-        $("fab-title").textContent = lart ? "Ткань" : /пластик|лдсп|стекл|керамик|матов/.test(keys) ? "Материал столешницы" : /ткань/.test(keys) ? "Ткань обивки" : "Материал";
-        $("fab-sub").textContent = lart ? "Категория — это ценовая группа ткани в прайсе фабрики. Цвет и образцы консультант пришлёт после заявки."
+        var softFabric = /зк|склад/.test(keys);  // категории ЗК/Склад — у мягкой мебели; у столов и стульев свои материалы
+        $("fab-title").textContent = softFabric ? "Ткань" : /пластик|лдсп|стекл|керамик|матов/.test(keys) ? "Материал столешницы" : /ткань/.test(keys) ? "Ткань обивки" : "Материал";
+        $("fab-sub").textContent = softFabric ? "Категория — это ценовая группа ткани в прайсе фабрики. Цвет и образцы консультант пришлёт после заявки."
             : vs.some(function (v) { var pr = Object.values(v.prices || {}); return pr.some(function (x) { return x !== pr[0]; }); })
             ? "Цена зависит от материала. Цвет и образцы консультант пришлёт после заявки."
             : "Цена одинаковая для всех вариантов — выберите по вкусу. Цвет и образцы консультант пришлёт после заявки.";
-        $("fab-explain").hidden = !lart;
+        $("fab-explain").hidden = !softFabric;
         if (!vs.length) { updateTotal(); return; }
         $("v-title").textContent = p.modular ? "Соберите комплект" : vs.length > 1 ? "Размер и исполнение" : "Исполнение";
         $("v-sub").textContent = "Начните с готового комплекта или добавьте модули по одному.";
@@ -840,8 +932,8 @@ img { display: block; max-width: 100%; }
         var code = "P" + phone.replace(/\D/g, "");
         var dropped = 0, tail = promo && promo.length >= 2 ? "_" + promo : "";  // промокод — последним, после «_»
         positions.forEach(function (it) {
-            var p = products.find(function (x) { return x.id === it.product_id; });
-            var mats = p ? materialsOf(p) : [], i = mats.indexOf(it.fabric);
+            var p = byId(it.product_id);
+            var mats = p && p.variants ? materialsOf(p) : [], i = mats.indexOf(it.fabric);
             var part = "L" + it.product_id + "F" + (i >= 0 ? i : "z");
             Object.keys(it.items).forEach(function (id) { part += "I" + id + "x" + it.items[id]; });
             if ((code + part).length <= 61 - tail.length) code += part; else dropped++;  // 3 знака — под X<n>
@@ -1000,6 +1092,7 @@ img { display: block; max-width: 100%; }
                     options: cfg.options.slice(), picked: $("d-picked").textContent.replace(/^Выбрано:\s*/, ""),
                     price: current.variants.length ? sumFor(cfg.fabric) : 0 });
         cart = cart.slice(-20); save("heritage.cart", cart); updateCounts(); haptic("ok");
+        if (D) gsap.fromTo("#cart-count", { scale: 1.6 }, { scale: 1, duration: .45, ease: "back.out(3)" });
         toast("Добавлено в корзину: " + current.name);
     };
     function renderCart() {
@@ -1007,7 +1100,8 @@ img { display: block; max-width: 100%; }
             return '<li>' + (it.photo ? '<img src="' + esc(it.photo) + '" alt="">' : "<span></span>") +
                 '<div><div class="t">' + esc(it.name) + '</div><div class="s">' + esc(it.picked) + '</div><button type="button" class="rm" data-i="' + i + '">Убрать</button></div>' +
                 '<div class="p num">' + (it.price ? rub(it.price) : "по запросу") + "</div></li>";
-        }).join("") : '<li class="cart-empty">Корзина пуста. Соберите модель и нажмите «В корзину».</li>';
+        }).join("") : '<li class="cart-empty">Корзина пуста. Соберите модель и нажмите «В корзину».<br><button type="button" class="btn-line" id="cart-go">Открыть каталог</button></li>';
+        if (!cart.length) $("cart-go").onclick = function () { closeCart(); if (current) close(); $("catalog").scrollIntoView({ behavior: reduce ? "auto" : "smooth" }); };
         $("cart-list").querySelectorAll(".rm").forEach(function (b) { b.onclick = function () {
             cart.splice(+b.dataset.i, 1); save("heritage.cart", cart); updateCounts(); renderCart(); }; });
         $("cart-sum").textContent = rub(cartTotal());
@@ -1049,6 +1143,14 @@ img { display: block; max-width: 100%; }
         };
         if (inTelegram && !(tg && tg.initData) && tg.sendData) { tg.sendData(JSON.stringify(payload)); return; }
         if (!inTelegram || !onServer) {  // витрина на GitHub или MAX: передаём кодом в start бота
+            // в коде заявки — номера материалов: нужны варианты каждой модели из корзины
+            var need = positions.map(function (it) { return byId(it.product_id); }).filter(function (p) { return p && !p.variants; });
+            if (need.length) {
+                $("c-send").disabled = true;
+                Promise.all(need.map(ensureDetail)).then(function () { $("c-send").disabled = false; $("cart-form").onsubmit(e); })
+                    .catch(function () { $("c-send").disabled = false; err("Нет связи. Проверьте интернет и нажмите ещё раз"); });
+                return;
+            }
             var code = startCode(phone, positions, payload.promo);
             if (!inTelegram && !inMax) {  // браузер: корзину чистим, только когда выбран мессенджер
                 $("cart-form").hidden = true; $("c-done").hidden = false;
